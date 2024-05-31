@@ -7,7 +7,7 @@ import (
 
 // Define a simple home Handler function which writes a byte slice
 // containing "Hello from Snippetbox" as a response body
-func home(w http.ResponseWriter, r *http.Request) {
+func handleHome(w http.ResponseWriter, r *http.Request) {
 	// Write() accepts only []byte as ‘most neutral’ message type
 	w.Write([]byte(`Hello from Snippetbox!`))
 }
@@ -16,7 +16,8 @@ func main() {
 	// use the http.NewServeMux() constructor to initialize a new servemux (router),
 	// then register the home() function as handler for the `/` endpoint.
 	mux := http.NewServeMux()
-	mux.HandleFunc(`GET /`, home)
+	// This is how it's done in go 1.22+
+	mux.HandleFunc(`GET /`, handleHome)
 
 	// Use the http.ListenAndServe() function as web serving unit. It accepts two parameters:
 	//   - the URL (which will be `localhost:3000` here)
