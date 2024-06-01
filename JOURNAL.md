@@ -3,6 +3,31 @@
 
 # JOURNAL
 
+## 2024-06-01 17:53
+
+Wir haben unsere Routes um ein einfaches `POST` erweitert:
+
+```go
+// Add a handler function for creating a snippet.
+func handleNewSnippet(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(`Creating a new snippet ...`))
+}
+
+func main() {
+	// use the http.NewServeMux() constructor to initialize a new servemux (router),
+	// then register the home() function as handler for the `/` endpoint.
+	mux := http.NewServeMux()
+
+	mux.HandleFunc(`GET /`, handleHome)
+	// This is how we add a POST endpoint in go 1.22
+	mux.HandleFunc(`POST /new`, handleNewSnippet)
+    // ...
+}
+```
+
+Wichtig für `mux.HandleFunc()` ist, dass nur __ein einziges__ Leerzeichen
+zwischen der HTTP-Methode und dem Endpoint steht.
+
 ## 2024-05-30 17:39
 
 ```go

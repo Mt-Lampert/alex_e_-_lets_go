@@ -12,12 +12,18 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`Hello from Snippetbox!`))
 }
 
+// Add a handler function for creating a snippet.
+func handleNewSnippet(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(`Creating a new snippet ...`))
+}
+
 func main() {
 	// use the http.NewServeMux() constructor to initialize a new servemux (router),
 	// then register the home() function as handler for the `/` endpoint.
 	mux := http.NewServeMux()
 	// This is how it's done in go 1.22+
 	mux.HandleFunc(`GET /`, handleHome)
+	mux.HandleFunc(`POST /new`, handleNewSnippet)
 
 	// Use the http.ListenAndServe() function as web serving unit. It accepts two parameters:
 	//   - the URL (which will be `localhost:3000` here)
