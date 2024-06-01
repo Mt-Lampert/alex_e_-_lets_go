@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -17,12 +18,20 @@ func handleNewSnippet(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`Creating a new snippet ...`))
 }
 
+// Add a handler function for viewing a specific snippet
+func handleSingleSnippetView(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue(`id`)
+	w.Write([]byte(fmt.Sprintf("Display snippet with ID '%s'", id)))
+}
+
 func main() {
 	// use the http.NewServeMux() constructor to initialize a new servemux (router),
 	// then register the home() function as handler for the `/` endpoint.
 	mux := http.NewServeMux()
 	// This is how it's done in go 1.22+
 	mux.HandleFunc(`GET /`, handleHome)
+
+	mux.HandleFunc(`GET /snippets/{id}`, handleSingleSnippetView)
 	mux.HandleFunc(`POST /new`, handleNewSnippet)
 
 	// Use the http.ListenAndServe() function as web serving unit. It accepts two parameters:

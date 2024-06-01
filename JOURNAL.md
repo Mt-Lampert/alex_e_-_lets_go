@@ -3,6 +3,29 @@
 
 # JOURNAL
 
+## 2024-06-01 18:33
+
+Hier geht es um URL-Parameter und wie man im Handler an sie herankommt
+
+```go
+// Add a handler function for viewing a specific snippet
+func handleSingleSnippetView(w http.ResponseWriter, r *http.Request) {
+	// this is how we get URL variables (see below); 
+	// they will always be strings or more exactly, []byte chains
+	id := r.PathValue(`id`)
+	w.Write([]byte(fmt.Sprintf("Display snippet with ID '%s'", id)))
+}
+
+func main() {
+	// use the http.NewServeMux() constructor to initialize a new servemux (router),
+	// then register the home() function as handler for the `/` endpoint.
+	mux := http.NewServeMux()
+
+	// This is an endpoint with URL parameters
+	mux.HandleFunc(`GET /snippets/{id}`, handleSingleSnippetView)
+}
+```
+
 ## 2024-06-01 17:53
 
 Wir haben unsere Routes um ein einfaches `POST` erweitert:
