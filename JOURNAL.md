@@ -30,7 +30,10 @@ func handleNewSnippet(w http.ResponseWriter, r *http.Request) {
 
 Alles wesentliche steht in den Kommentaren.
 
-Hier die Ausgabe mit _httpie:_
+Eines noch: `http.StatusMethodNotAllowed` ist
+[hier](https://pkg.go.dev/net/http@go1.22.3#pkg-constants) dokumentiert!
+
+Bleibt noch die Ausgabe mit _httpie:_
 
 ```bash
 $ http GET ':3000/snippets/new'
