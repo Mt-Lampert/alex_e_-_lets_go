@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 // Define a simple home Handler function which writes a byte slice
@@ -24,12 +25,29 @@ func handleSingleSnippetView(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("Display snippet with ID '%s'", id)))
 }
 
+func handleUrlQuery(w http.ResponseWriter, r *http.Request) {
+	// get the id
+	rawId := r.URL.Query().Get(`id`)
+
+	// validate the id:
+	//    - it must be numerical
+	//    - it must be greater than 0
+	id, err := strconv.Atoi(rawId)
+	if err != nil || id <= 0 {
+		http.Error(w, `invalid ID!`, http.StatusBadRequest)
+		return
+	}
+
+	w.Write([]byte(fmt.Sprintf(`You were looking for something with id '%s'`, rawId)))
+}
+
 func main() {
 	// use the http.NewServeMux() constructor to initialize a new servemux (router),
 	// then register the home() function as handler for the `/` endpoint.
 	mux := http.NewServeMux()
 	// This is how it's done in go 1.22+
-	mux.HandleFunc(`GET /`, handleHome)
+	// mux.HandleFunc(`GET /`, handleHome)
+	mux.HandleFunc(`GET /urlquery`, handleUrlQuery)
 
 	mux.HandleFunc(`GET /snippets/{id}`, handleSingleSnippetView)
 	mux.HandleFunc(`POST /snippets/new`, handleNewSnippet)

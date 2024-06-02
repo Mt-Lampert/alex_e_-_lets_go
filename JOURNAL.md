@@ -3,6 +3,44 @@
 
 # JOURNAL
 
+## 2024-06-02 20:29
+
+### Query Parameters, die Vanilla-Methode
+
+Das folgende Beispiel zeigt, wie man an _Query Paramaters_ herankommt. _Query_
+Parameters, wohlgemerkt! Das sind Parameter, die nicht „ganz hinten“ mit `{id}`
+angehängt werden und von dem neuen ServeMux sehr gut gemanaged werden; Query
+Parameters werden bei einem `GET` mit Hilfe von `?` und `&` hinten an den
+Endpunkt drangehängt.
+
+Beispiel: `https://www.youtube.com/watch?v=RNLLPbMThGM&t=39`
+
+Das folgende Beispiel zeigt, wie man damit umgeht:
+
+```go
+func handleUrlQuery(w http.ResponseWriter, r *http.Request) {
+	// get the id
+	rawId := r.URL.Query().Get(`id`)
+
+	// validate the id:
+	//    - it must be numerical
+	//    - it must be greater than 0
+	id, err := strconv.Atoi(rawId)
+	if err != nil || id <= 0 {
+		http.Error(w, `invalid ID!`, http.StatusBadRequest)
+		// http.Error() is only for writing, not for exiting, so ...
+		return
+	}
+
+	w.Write([]byte(fmt.Sprintf(`You were looking for something with id '%s'`, rawId)))
+}
+```
+
+So wie wir hier die ID validiert haben, müssen wir dann jeden einzelnen _Query
+Parameter_ validieren ...
+
+
+
 ## 2024-06-02 11:02
 
 Weil es pädagogisch so wertvoll ist, betrachten wir ein bisschen
