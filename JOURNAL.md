@@ -44,6 +44,21 @@ Date: Sun, 02 Jun 2024 14:38:34 GMT
 Method not allowed!
 ```
 
+### Alternativ: http.Error()
+
+Mit folgendem Trick hätten wir die Sache von oben noch vereinfachen können:
+
+```go
+func handleNewSnippet(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.Header.Set(`Allow`, `POST`)
+		// http.Error() is just a wrapper for the exact thing we did above!
+		http.Error(w, `Method not allowed!`, http.StatusMethodNotAllowed)
+	}
+}
+
+```
+
 
 ## 2024-06-02 09:21
 
