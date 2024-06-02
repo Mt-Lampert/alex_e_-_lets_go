@@ -3,6 +3,89 @@
 
 # JOURNAL
 
+## 2024-06-02 11:02
+
+Weil es pädagogisch so wertvoll ist, betrachten wir ein bisschen
+`net/http`-Verhalten der alten Schule. Da kam nicht automatisch ein
+`415`-Fehler, wenn eine falsche HTTP-Methode angewählt wurde; man musste das
+alles selber backen. So sah das z.B. aus:
+
+```go
+func handleNewSnippet(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		// Use the Header.Set() method to add an 'Allow: POST' header
+		// to the response header map.
+		// The first parameter is the header name, and the second parameter
+		// is the header value.
+		// Again: Set() will create or update the header we want to be there; nothing appended!
+		w.Header.Set(`Allow`, `POST`)
+		// w.writeHeader() provides ‘seal and signature’ to the current header material
+		// After this, the response header cannot be reversed! It accepts the HTTP
+		// status code as an argument
+		w.writeHeader(http.StatusMethodNotAllowed)
+		w.write([]byte(`Method not allowed!`)
+	}
+}
+```
+
+Alles wesentliche steht in den Kommentaren.
+
+Hier die Ausgabe mit _httpie:_
+
+```bash
+$ http GET ':3000/snippets/new'
+
+HTTP/1.1 405 Method Not Allowed
+Allow: POST
+Content-Length: 19
+Content-Type: text/plain; charset=utf-8
+Date: Sun, 02 Jun 2024 14:38:34 GMT
+
+Method not allowed!
+```
+
+
+## 2024-06-02 09:21
+
+### Response-Header hinzufügen
+
+Mit Go-Bordmitteln gibt es dafür zwei Methoden:
+
+```go
+func (p Proxy) handleXyz(w http.ResponseWriter, r *http.Request) {
+    // add a value to an existing header
+	r.Header.Add("Header01", "head 01")
+	// create a new / reset an existing header
+	r.Header.Set("Header02", "head 02")
+	p.Proxy.ServeHTTP(w, r)
+}
+```
+
+#### Anmerkungen
+
+1. Ich habe für dieses Beispiel irgendwo einen Proxy-Server im System laufen,
+   dem ich auf diese Weise Anweisungen gebe, in diesem Fall die versteckte
+   Anweisung, die Header beim Client anzuzeigen (sieht man hier nicht).
+2. Mit `r.Header.Add()` bleibt der entsprechende Header in der Request
+   erhalten; nichts wird ersetzt. Stattdessen wird das Neue „unten angefügt“.
+3. Mit `r.Header.Set()` wird entweder ein neuer Header geschaffen, oder ein
+   bestehender Header wird überschrieben.
+
+`Add()` entspricht also _append,_ oder dem `>>`-Opeartor in der Shell; `Set()`
+bedeutet _create or reset,_ das, was der `>`-Operator in der Shell macht.
+
+```bash
+$ curl -i http://localhost:8080 -H 'header01: foo' -H 'header0: bar'
+HTTP/1.1 200 OK
+Content-Length: 34
+Content-Type: text/plain; charset=utf-8
+Date: Tue, 17 Jan 2023 20:46:34 GMT
+
+header01: [head1 foo], header02: [bar]
+```
+
+
+
 ## 2024-06-01 18:33
 
 Hier geht es um URL-Parameter und wie man im Handler an sie herankommt
@@ -93,3 +176,7 @@ Endpoint Handler erkannt.
 
 Hab das Projekt noch einmal neu gestartet; dieses Mal soll es mit ausführlichen
 Anmerkungen gemacht werden. Alles von Grund auf. „Dieses Mal richtig.“
+
+<!--
+vim: ts=4 sw=4 fdm=indent
+-->

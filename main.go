@@ -32,7 +32,7 @@ func main() {
 	mux.HandleFunc(`GET /`, handleHome)
 
 	mux.HandleFunc(`GET /snippets/{id}`, handleSingleSnippetView)
-	mux.HandleFunc(`POST /new`, handleNewSnippet)
+	mux.HandleFunc(`POST /snippets/new`, handleNewSnippet)
 
 	// Use the http.ListenAndServe() function as web serving unit. It accepts two parameters:
 	//   - the URL (which will be `localhost:3000` here)
