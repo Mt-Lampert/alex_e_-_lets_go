@@ -18,6 +18,7 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 	templates := []string{
 		"./ui/html/base.go.html",
 		"./ui/html/pages/home.go.html",
+		"./ui/html/partials/nav.go.html",
 	}
 
 	// template.ParseFiles() reads the templates into a template set.
