@@ -3,6 +3,31 @@
 
 # JOURNAL
 
+Mit folgenden Zeilen können wir statische Dateien wie Bilder, CSS-Dateien oder JavaScript-Dateien
+auf unserer Webseite laden:
+
+```go
+// file: cmd/web/handlers.go
+func handleHome(w http.ResponseWriter, r *http.Request) {
+    // ...
+
+	// Create a file server that serves static files out of './ui/static/'. The
+	// path here is relative to the project directory root.
+	fileServer := http.FileServer(http.Dir(`./ui/static/`))
+
+	// Register the fileServer for all URL paths that start with '/static/'.
+	// For matching paths, we strip the '/static' prefix before the request
+	// reaches the fileServer.
+	mux.HandleFunc(`GET /static/`, http.StripPrefix(`/static`, fileServer))
+
+	// ...
+}
+```
+
+Alles Wesentliche findet sich in den Kommentaren.
+
+
+
 ## 2024-06-03 08:40
 
 Wir haben die Templates ein wenig umgestellt, um _partials_ und _Snippets_ möglich zu machen:

@@ -9,7 +9,17 @@ func main() {
 	// use the http.NewServeMux() constructor to initialize a new servemux (router),
 	// then register the home() function as handler for the `/` endpoint.
 	mux := http.NewServeMux()
-	// This is how it's done in go 1.22+
+
+	// Create a file server that serves static files out of './ui/static/'. The
+	// path here is relative to the project directory root.
+	fileServer := http.FileServer(http.Dir(`./ui/static/`))
+
+	// Register the fileServer for all URL paths that start with '/static/'.
+	// For matching paths, we strip the '/static' prefix before the request
+	// reaches the fileServer.
+	mux.HandleFunc(`GET /static/`, http.StripPrefix(`/static`, fileServer))
+
+	// Endpoints
 	mux.HandleFunc(`GET /`, handleHome)
 	mux.HandleFunc(`GET /urlquery`, handleUrlQuery)
 
