@@ -15,20 +15,28 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	templates := []string{
+		"./ui/html/base.go.html",
+		"./ui/html/pages/home.go.html",
+	}
+
 	// template.ParseFiles() reads the templates into a template set.
 	// If there is an error, we log the detailed error message on the terminal
 	// and use the http.Error() function to send a generic 500 server error.
-	ts, err := template.ParseFiles(`./ui/html/pages/home.go.html`)
+	// the paths are a variadic parameter here.
+	ts, err := template.ParseFiles(templates...)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, `Internal Server Error has occured!`, http.StatusInternalServerError)
 	}
 
-	// Since we made it here, we use the Execute() method on the template set
-	// to write the template content as the response body. The last parameter
-	// of Execute() represents any dynamic data we want to pass in; at the
-	// moment it will be nil.
-	err = ts.Execute(w, nil)
+	// Since we made it here, we use the ExecuteTemplate() method on the
+	// template set to write the template content as the response body.
+	// The second parameter of ExecuteTemplate() is the 'base' template or the
+	// master template that this page is built on.
+	// The last parameter of Execute() represents any dynamic data we want to
+	// pass in; at the moment it will be nil.
+	err = ts.ExecuteTemplate(w, `base`, nil)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, `Template Error. WTF?!!`, 500)

@@ -3,6 +3,72 @@
 
 # JOURNAL
 
+## 2024-06-03 08:40
+
+Wir haben die Templates ein wenig umgestellt, um _partials_ und _Snippets_ möglich zu machen:
+
+```html
+<!-- file: ui/web/base.go.html -->
+{{ define "base" }}
+
+  <!-- HTML page layout -->
+
+  {{ template "main" . }}
+
+  <!-- More HTML page layout -->
+{{ end }}
+```
+
+In der angegebenen Datei `ui/web/base.go.html` haben wir also den “base”-Block
+definiert. Es ist nachher unerheblich in welcher Datei genau dieser Block
+definiert wird. Wichtig ist nur, dass er definiert _ist,_ wenn
+`ExecuteTemplate()` im Handler aufgerufen wird.
+
+Innerhalb des “base”-Blocks wird der “main”-Block an genau der bezeichneten
+Stelle hineingeladen. Es ist auch hier nachher unerheblich, in welcher Datei
+genau dieser Block definiert wird. Wichtig ist auch hier nur, dass er definiert
+_ist,_ wenn `ExecuteTemplate()` im Handler aufgerufen wird.
+
+Zum Schluss mussten noch Änderungen im Handler vorgenommen werden
+
+```go
+func handleHome(w http.ResponseWriter, r *http.Request) {
+	// - 1 -
+	templates := []string{
+		"./ui/html/base.go.html",
+		"./ui/html/pages/home.go.html",
+	}
+
+	// - 2 -
+	ts, err := template.ParseFiles(templates...)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, `Internal Server Error has occured!`, http.StatusInternalServerError)
+	}
+
+	// - 3 -
+	err = ts.ExecuteTemplate(w, `base`, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, `Template Error. WTF?!!`, 500)
+	}
+```
+
+#### Anmerkungen
+
+1. Da für den Aufbau dieser Seite mehr als eine Template-Datei benötigt wird,
+   sammeln wir die Dateipfade in einem _Slice._
+2. Diesen _Slice_ übergeben wir an `ParseFiles()`, und zwar mit drei Punkten
+   `templates...`. Dieses Konstrukt entspricht genau dem _Spread Operator_ in
+   JavaScript. Der Slice wird damit in seine Elemente aufgespalten, und diese
+   Elemente bilden den „Rattenschwanz“ für die `ParseFiles()`-Methode.
+3. aus `ts.Execute()` wurde `ts.ExecuteTemplate()`, und `ExecuteTemplate()`
+   braucht als zweiten Parameter den Template-Block, der den äußeren Rahmen für
+   die geplante HTML-Einheit bildet. In unserem Fall ist das der “base”-Block.
+
+So geht das in der “Vanilla”-Edition mit Go Templates. Wir haben es einmal
+erfolgreich durchgespielt. Halleluja!
+
 ## 2024-06-03 07:43
 
 Ich hab das erste Golang-Template geladen und vorher das Projekt umorganisiert. Ging 
