@@ -3,6 +3,55 @@
 
 # JOURNAL
 
+## 2024-06-03 07:43
+
+Ich hab das erste Golang-Template geladen und vorher das Projekt umorganisiert. Ging 
+erstaunlich reibungslos. Die Landing Page hat noch kein CSS, aber das wird sich bald ändern.
+
+Hier der Code für den `handleHome()`-Handler:
+
+```go
+func handleHome(w http.ResponseWriter, r *http.Request) {
+	// exclude anything but root as endpoint
+	if r.URL.Path != `/` {
+		http.NotFound(w, r)
+		return
+	}
+
+	// template.ParseFiles() reads the templates into a template set.
+	// If there is an error, we log the detailed error message on the terminal
+	// and use the http.Error() function to send a generic 500 server error.
+	ts, err := template.ParseFiles(`./ui/html/pages/home.go.html`)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, `Internal Server Error has occured!`, http.StatusInternalServerError)
+	}
+
+	// Since we made it here, we use the Execute() method on the template set
+	// to write the template content as the response body. The last parameter
+	// of Execute() represents any dynamic data we want to pass in; at the
+	// moment it will be nil.
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, `Template Error. WTF?!!`, 500)
+	}
+}
+```
+
+#### Anmerkungen:
+
+In Go's _Vanilla Templates_ 
+
+- muss als erstes in jedem Handler ein eigenes _Template Set_ erstellt werden.
+  Dieses _Template Set_ muss alle Template-Dateien beinhalten, die für das
+  Erstellen dieser besonderen Seite benötigt werden: _base,_ alle _partials,_
+  alle _snippets_ – einfach alles, was dazugehört!
+- wird danach das _Template Set_ zu einer vollständigen HTML-Einheit (kann auch
+  ein HTMX-Snippet sein!) zusammengefasst und rausgeschickt (dafür sorgt der
+  `w`-Parameter)
+ 
+
 ## 2024-06-02 20:29
 
 ### Query Parameters, die Vanilla-Methode

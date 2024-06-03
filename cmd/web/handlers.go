@@ -2,15 +2,37 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
 
-// Define a simple home Handler function which writes a byte slice
-// containing "Hello from Snippetbox" as a response body
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	// Write() accepts only []byte as ‘most neutral’ message type
-	w.Write([]byte(`Hello from Snippetbox!`))
+	//exclude anything but root as endpoint
+	if r.URL.Path != `/` {
+		http.NotFound(w, r)
+		return
+	}
+
+	// template.ParseFiles() reads the templates into a template set.
+	// If there is an error, we log the detailed error message on the terminal
+	// and use the http.Error() function to send a generic 500 server error.
+	ts, err := template.ParseFiles(`./ui/html/pages/home.go.html`)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, `Internal Server Error has occured!`, http.StatusInternalServerError)
+	}
+
+	// Since we made it here, we use the Execute() method on the template set
+	// to write the template content as the response body. The last parameter
+	// of Execute() represents any dynamic data we want to pass in; at the
+	// moment it will be nil.
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, `Template Error. WTF?!!`, 500)
+	}
 }
 
 // Add a handler function for creating a snippet.

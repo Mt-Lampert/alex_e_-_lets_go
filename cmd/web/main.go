@@ -10,7 +10,7 @@ func main() {
 	// then register the home() function as handler for the `/` endpoint.
 	mux := http.NewServeMux()
 	// This is how it's done in go 1.22+
-	// mux.HandleFunc(`GET /`, handleHome)
+	mux.HandleFunc(`GET /`, handleHome)
 	mux.HandleFunc(`GET /urlquery`, handleUrlQuery)
 
 	mux.HandleFunc(`GET /snippets/{id}`, handleSingleSnippetView)
