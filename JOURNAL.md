@@ -18,7 +18,7 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 	// Register the fileServer for all URL paths that start with '/static/'.
 	// For matching paths, we strip the '/static' prefix before the request
 	// reaches the fileServer.
-	mux.HandleFunc(`GET /static/`, http.StripPrefix(`/static`, fileServer))
+	http.Handle(`/static/`, http.StripPrefix(`/static`, fileServer))
 
 	// ...
 }
