@@ -3,6 +3,50 @@
 
 # JOURNAL
 
+## 2024-06-04 08:05
+
+Mit Hilfe von _Command Line Flags_ können wir spezielle Einstellungen auf der
+Kommandozeile vornehmen und sind nicht von hart einkodierten Einstellungen
+abhängig.
+
+Das folgende Beispiel zeigt, wie man mit einer Kommandozeilen-Option den Port
+für die Anwendung ändern kann:
+
+```go
+func main() {
+	// ...
+
+	// Define a new command line flag with the name 'addr' and a default value
+	// of ':3000' and a short help text to tell what this flag is doing.
+	port := flag.String(`port`, `:3000`, "setting the port number")
+
+	// Now we have to use the flag.Parse() function to parse the command-line flag.
+	// This reads in the command line flag value and assigns it to the 'port' variable.
+	// We need to call this **before** we use the 'port' variable; otherwise the value
+	// will always be ':3000'.
+	// If any errors occur, the application will panic.
+	flag.Parse()
+
+	// ...
+
+	// The value returned from flag.String() is a pointer to the flag value,
+	// not the value itself. So we need to dereference the pointer. To make
+	// this work properly, Println() must become Printf()
+	log.Printf("starting server at port %s", *port)
+	err := http.ListenAndServe(*port, mux)
+
+	// ...
+}
+```
+
+Ab jetzt können wir die App so wie hier aufrufen, und es wird einen neuen Port geben:
+
+```bash
+$ go run cmd/web/ -port=':9999'
+```
+
+## 2024-06-03 17:33
+
 Mit folgenden Zeilen können wir statische Dateien wie Bilder, CSS-Dateien oder JavaScript-Dateien
 auf unserer Webseite laden:
 

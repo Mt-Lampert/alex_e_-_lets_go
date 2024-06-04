@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 )
@@ -9,6 +10,17 @@ func main() {
 	// use the http.NewServeMux() constructor to initialize a new servemux (router),
 	// then register the home() function as handler for the `/` endpoint.
 	mux := http.NewServeMux()
+
+	// Define a new command line flag with the name 'addr' and a default value
+	// of ':3000' and a short help text to tell what this flag is doing.
+	port := flag.String(`port`, `:3000`, "setting the port number")
+
+	// Now we have to use the flag.Parse() function to parse the command-line flag.
+	// This reads in the command line flag value and assigns it to the 'port' variable.
+	// We need to call this **before** we use the 'port' variable; otherwise the value
+	// will always be ':3000'.
+	// If any errors occur, the application will panic.
+	flag.Parse()
 
 	// Create a file server that serves static files out of './ui/static/'. The
 	// path here is relative to the project directory root.
@@ -26,13 +38,11 @@ func main() {
 	mux.HandleFunc(`GET /snippets/{id}`, handleSingleSnippetView)
 	mux.HandleFunc(`POST /snippets/new`, handleNewSnippet)
 
-	// Use the http.ListenAndServe() function as web serving unit. It accepts two parameters:
-	//   - the URL (which will be `localhost:3000` here)
-	//   - the router we just created.
-	// If the webserver returns an error, we handle it using log.Fatal() to log the error and exit.
-	// Note that any error returned by http.ListenAndServe() is non-nil!
-	log.Println("starting server at port :3000")
-	err := http.ListenAndServe(":3000", mux)
+	// The value returned from flag.String() is a pointer to the flag value,
+	// not the value itself. So we need to dereference the pointer. To make
+	// this work properly, Println() must become Printf()
+	log.Printf("starting server at port %s", *port)
+	err := http.ListenAndServe(*port, mux)
 	if err != nil {
 		log.Fatalf("Uh oh! %s", err)
 	}
