@@ -7,6 +7,14 @@ import (
 	"os"
 )
 
+// Define an 'app' struct to hold global status for the application.
+// For now we will only include fields for the two custom loggers, but
+// this one will grow and grow and grow over the course of the project.
+type Application struct {
+	ErrLog  *log.Logger
+	InfoLog *log.Logger
+}
+
 func main() {
 	// use the http.NewServeMux() constructor to initialize a new servemux (router),
 	// then register the home() function as handler for the `/` endpoint.
@@ -28,12 +36,19 @@ func main() {
 	// reaches the fileServer.
 	http.Handle(`/static/`, http.StripPrefix(`/static`, fileServer))
 
-	// Endpoints
-	mux.HandleFunc(`GET /`, handleHome)
-	mux.HandleFunc(`GET /urlquery`, handleUrlQuery)
+	// introduce the app Object in order to grant access to the global
+	// application state.
+	app := &Application{
+		ErrLog:  errLog,
+		InfoLog: infoLog,
+	}
 
-	mux.HandleFunc(`GET /snippets/{id}`, handleSingleSnippetView)
-	mux.HandleFunc(`POST /snippets/new`, handleNewSnippet)
+	// Endpoints with handlers as app methods
+	mux.HandleFunc(`GET /`, app.handleHome)
+	mux.HandleFunc(`GET /urlquery`, app.handleUrlQuery)
+
+	mux.HandleFunc(`GET /snippets/{id}`, app.handleSingleSnippetView)
+	mux.HandleFunc(`POST /snippets/new`, app.handleNewSnippet)
 
 	// See 2024-06-04 09:44 Journal for documentation
 	srv := &http.Server{

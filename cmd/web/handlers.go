@@ -3,12 +3,11 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
-func handleHome(w http.ResponseWriter, r *http.Request) {
+func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 	//exclude anything but root as endpoint
 	if r.URL.Path != `/` {
 		http.NotFound(w, r)
@@ -21,41 +20,38 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 		"./ui/html/partials/nav.go.html",
 	}
 
-	// template.ParseFiles() reads the templates into a template set.
-	// If there is an error, we log the detailed error message on the terminal
-	// and use the http.Error() function to send a generic 500 server error.
-	// the paths are a variadic parameter here.
+	// See Journal, 2024-06-03 07:43 for documentation
 	ts, err := template.ParseFiles(templates...)
 	if err != nil {
-		log.Println(err.Error())
+		// See Journal, 2024-06-04 19:09 for documentation
+		app.ErrLog.Println(err.Error())
 		http.Error(w, `Internal Server Error has occured!`, http.StatusInternalServerError)
+		return
 	}
 
-	// Since we made it here, we use the ExecuteTemplate() method on the
-	// template set to write the template content as the response body.
-	// The second parameter of ExecuteTemplate() is the 'base' template or the
-	// master template that this page is built on.
-	// The last parameter of Execute() represents any dynamic data we want to
-	// pass in; at the moment it will be nil.
+	// See Journal, 2024-06-03 07:43 for documentation
 	err = ts.ExecuteTemplate(w, `base`, nil)
 	if err != nil {
-		log.Println(err.Error())
+		// Because 'handleHome()' is now an 'app' method, it can access its fields,
+		// including the error logger. ⇒ We use this logger now instead of the standard logger.
+		app.ErrLog.Println(err.Error())
 		http.Error(w, `Template Error. WTF?!!`, 500)
+		return
 	}
 }
 
 // Add a handler function for creating a snippet.
-func handleNewSnippet(w http.ResponseWriter, r *http.Request) {
+func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`Creating a new snippet ...`))
 }
 
 // Add a handler function for viewing a specific snippet
-func handleSingleSnippetView(w http.ResponseWriter, r *http.Request) {
+func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue(`id`)
 	w.Write([]byte(fmt.Sprintf("Display snippet with ID '%s'", id)))
 }
 
-func handleUrlQuery(w http.ResponseWriter, r *http.Request) {
+func (app Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {
 	// get the id
 	rawId := r.URL.Query().Get(`id`)
 

@@ -5,6 +5,171 @@
 
 ## 2024-06-04 XX:XX
 
+## 2024-06-04 19:09
+
+### Implementierung der dependency injection
+
+Als erstes braucht es einen Datentyp, in dem alle globalen Status-Informationen vermerkt sind:
+
+```go
+// file: ./cmd/web/main.go
+
+// Define an 'app' struct to hold global status for the application.
+// For now we will only include fields for the two custom loggers, but
+// this one will grow and grow and grow over the course of the project.
+type Application struct {
+	ErrLog  *log.Logger
+	InfoLog *log.Logger
+}
+// ...
+```
+
+Dann muss ein Objekt dieses Datentyps in `main()` eingeführt werden: 
+
+
+```go
+// file: ./cmd/web/main.go
+
+func main() {
+	// ...
+
+	// introduce the infolog and the errLog instances
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	// introduce the app Object in order to grant access to the global
+	// application state.
+	app := &Application{
+		ErrLog:  errLog,
+		InfoLog: infoLog,
+	}
+	
+	// ...
+}
+```
+
+Als nächstes müssen sämtliche Handler als `app`-Methoden umgeschrieben werden:
+
+```go
+// file: ./cmd/web/handlers.go
+
+func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
+	// ...
+}
+
+func (app *Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) {
+	// ...
+}
+
+// etc.
+```
+
+Dann müssen auch die Routen auf die neuen Realitäten eingestellt werden:
+
+```go
+// file: ./cmd/web/main.go
+
+func main() {
+	// ...
+
+	// Endpoints with handlers as app methods
+	mux.HandleFunc(`GET /`, app.handleHome)
+	mux.HandleFunc(`GET /urlquery`, app.handleUrlQuery)
+
+	mux.HandleFunc(`GET /snippets/{id}`, app.handleSingleSnippetView)
+	mux.HandleFunc(`POST /snippets/new`, app.handleNewSnippet)
+
+	// ...
+}
+```
+
+Und schließlich gilt es, auch den Code in den Handlern anzupassen. Beispiel:
+
+```go
+// file: ./cmd/web/handlers.go
+
+func (app *Application) handleHome(w ResponseWriter, r *http.Request) {
+	// ...
+
+	ts, err := template.ParseFiles(templates...)
+	if err != nil {
+		// Because 'handleHome()' is now an 'app' method, it can access its fields,
+		// including the error logger. ⇒ We use this logger now instead of the standard logger.
+		app.ErrLog.Println(err.Error())
+		http.Error(w, `Internal Server Error has occured!`, http.StatusInternalServerError)
+		return
+	}
+
+	// ...
+}
+```
+
+__YEEEEHAAAW!__
+
+## 2024-06-04 16:00
+
+### Globaler Status
+
+Es gibt einige Dinge, die lassen sich nicht auf eigene Funktionen und eigene
+Handler beschränken, z.B., welche wichtigen Header-Informationen in der
+_Request_ mitgeliefert wurden, ob ein Benutzer eingeloggt ist oder nicht. Ob er
+Administrator ist oder nicht. Ob er gerade im System gesperrt ist oder nicht.
+Welche ID er gerade hat. Das muss irgendwie _global_ gelöst werden, und
+`main()`, jeder Handler und jede Hilfsfunktion sollte irgendwie Zugriff auf
+diese allgemeinen, globalen Informationen bekommen – wenigstens Lesezugriff
+sollte sie haben.
+
+Um dieses Problem zu lösen, gibt es mehrere Wege. Frameworks wie
+[Echo](https://echo.labstack.com) oder [Fiber](https://docs.gofiber.io) bieten
+dafür das _Context_-Objekt an, entweder als
+[`echo.Context`](https://echo.labstack.com/docs/context) oder als
+[`fiber.Ctx`](https://docs.gofiber.io/api/ctx).
+
+#### Die Puristen-Lösung: `context` (StdLib)
+
+Vanilla-Puristen versuchen dagegen, uns zu diesem Zweck und Behufe auf das
+hauseigene [Context](https://pkg.go.dev/context)-Paket einzuschwören. Geht im
+Grunde genommen ganz einfach:
+
+```go
+import (
+	"context"
+	"fmt"
+)
+
+func doSomething(ctx context.Context, key String) {
+	fmt.Printf("doSomething: myKey's value is %s\n", ctx.Value(key))
+}
+
+func main() {
+	ctx := context.Background()
+	// add a new Context value; returns a deep copy of the existing ctx object
+	ctx = context.WithValue(ctx, "foo", "Foo Value")
+	// use the new value
+	doSomething(ctx, "foo")
+}
+```
+
+Der _value_ ist bei `WithValue()` als `any` deklariert; es kann also alles
+Mögliche sein, was in Go gebaut werden kann. Bei großen Objekten empfehlen sich
+für den _value_ _Pointer_ auf diese Objekte.
+
+All diesen Lösungen ist gemein, dass sie einen _Vertrag_ anbieten: „Alles, was
+du brauchst, findest du in unserem Context-Objekt!“. Ein solcher Vertrag muss
+natürlich intensiv dokumentiert sein -- auch der Vertrag, den der
+Vanilla-Purist mit Hilfe des _Context_-Menüs aus der _Standard Library_ baut.
+Sonst kann keiner der Teamkollegen das Context-Objekt verstehen, geschweige
+verwenden!
+
+#### Alex Edward's Lösung: _Dependency injection_
+
+Das Wort ‘injection’ bedeutet, dass etwas „eingespritzt“ wird. Bei Alex läuft
+das so, dass jeder Handler eine Methode für das `app`-Objekt wird, in dem dann
+alle globalen Daten drinstehen (wieder ein Vertrag, der intensivst dokumentiert 
+werden muss).
+
+
+
 ## 2024-06-04 09:44
 
 Um auch die internen Fehlermeldungen an unseren neuen `errLog` weiterzugeben,
