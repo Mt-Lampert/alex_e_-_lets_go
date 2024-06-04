@@ -12,6 +12,7 @@ func main() {
 	// then register the home() function as handler for the `/` endpoint.
 	mux := http.NewServeMux()
 
+	// See Journal, 2024-06-04 08:05 for documentation
 	port := flag.String(`port`, `:3000`, "setting the port number")
 	flag.Parse()
 
@@ -34,10 +35,7 @@ func main() {
 	mux.HandleFunc(`GET /snippets/{id}`, handleSingleSnippetView)
 	mux.HandleFunc(`POST /snippets/new`, handleNewSnippet)
 
-	// Initialize a new http.Server struct. We set the Addr and the Handler fields so
-	// that the server uses the same network address and and routes as before,
-	// and set the 'ErrorLog' field so that the server now uses the custom errLog logger
-	// in case a bug lurks its head in this app.
+	// See 2024-06-04 09:44 Journal for documentation
 	srv := &http.Server{
 		Addr:     *port,
 		ErrorLog: errLog,

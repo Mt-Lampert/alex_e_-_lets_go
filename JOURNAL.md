@@ -5,10 +5,42 @@
 
 ## 2024-06-04 XX:XX
 
-## 2024-06-04 XX:XX
+## 2024-06-04 09:44
 
-Um auch die internen Fehlermeldungen an unseren neuen `errLog` weiterzugeben, müssen wir `main()` wieder um einen Punkt ergänzen:
+Um auch die internen Fehlermeldungen an unseren neuen `errLog` weiterzugeben,
+müssen wir `main()` wieder um einen Punkt ergänzen. Wir brauchen eine selbstgebackene 
+`http.Server`-Instanz mit eigenen Einstellungen. Der Code erklärt, wie es geht:
 
+```go
+func main()
+	// ...
+
+	// Initialize a new http.Server instance. We set the Addr and the Handler fields so
+	// that the server uses the same network address and and routes as before,
+	// and set the 'ErrorLog' field so that the server now uses the custom errLog logger
+	// in case a bug lurks its head in this app.
+	// - 1- 
+	srv := &http.Server{
+		Addr:     *port,
+		ErrorLog: errLog,
+		Handler:  mux,
+	}
+
+	infoLog.Printf("starting server at port %s", *port)
+	// now call the 'ListenAndServe()' method of our own http.Server version
+	err := srv.ListenAndServe()
+	if err != nil {
+		errLog.Fatalf("Uh oh! %s", err)
+	}
+}
+```
+
+#### Anmerkungen
+
+1. Genau so erschafft man in Go ein „Objekt“: Man nimmt einen bestehenden
+   Datentyp (`struct`) und erstellt etwas mit einer eigenen Speicheradresse
+   (`&`), dessen Referenz man an eine Variable zurückgibt – so wie das hier bei
+   `srv` passiert.
 
 
 ## 2024-06-04 09:04
