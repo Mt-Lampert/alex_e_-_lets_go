@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -11,19 +12,14 @@ func main() {
 	// then register the home() function as handler for the `/` endpoint.
 	mux := http.NewServeMux()
 
-	// Define a new command line flag with the name 'addr' and a default value
-	// of ':3000' and a short help text to tell what this flag is doing.
 	port := flag.String(`port`, `:3000`, "setting the port number")
-
-	// Now we have to use the flag.Parse() function to parse the command-line flag.
-	// This reads in the command line flag value and assigns it to the 'port' variable.
-	// We need to call this **before** we use the 'port' variable; otherwise the value
-	// will always be ':3000'.
-	// If any errors occur, the application will panic.
 	flag.Parse()
 
-	// Create a file server that serves static files out of './ui/static/'. The
-	// path here is relative to the project directory root.
+	// see Journal: 2024-06-04 for documentation
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	// see Journal: 2024-06-04 for documentation
 	fileServer := http.FileServer(http.Dir(`./ui/static/`))
 
 	// Register the fileServer for all URL paths that start with '/static/'.
@@ -38,13 +34,21 @@ func main() {
 	mux.HandleFunc(`GET /snippets/{id}`, handleSingleSnippetView)
 	mux.HandleFunc(`POST /snippets/new`, handleNewSnippet)
 
-	// The value returned from flag.String() is a pointer to the flag value,
-	// not the value itself. So we need to dereference the pointer. To make
-	// this work properly, Println() must become Printf()
-	log.Printf("starting server at port %s", *port)
-	err := http.ListenAndServe(*port, mux)
+	// Initialize a new http.Server struct. We set the Addr and the Handler fields so
+	// that the server uses the same network address and and routes as before,
+	// and set the 'ErrorLog' field so that the server now uses the custom errLog logger
+	// in case a bug lurks its head in this app.
+	srv := &http.Server{
+		Addr:     *port,
+		ErrorLog: errLog,
+		Handler:  mux,
+	}
+
+	infoLog.Printf("starting server at port %s", *port)
+	// now call the 'ListenAndServe()' method of our own http.Server version
+	err := srv.ListenAndServe()
 	if err != nil {
-		log.Fatalf("Uh oh! %s", err)
+		errLog.Fatalf("Uh oh! %s", err)
 	}
 }
 

@@ -3,6 +3,49 @@
 
 # JOURNAL
 
+## 2024-06-04 XX:XX
+
+## 2024-06-04 XX:XX
+
+Um auch die internen Fehlermeldungen an unseren neuen `errLog` weiterzugeben, müssen wir `main()` wieder um einen Punkt ergänzen:
+
+
+
+## 2024-06-04 09:04
+
+Hier geht es darum, hausgeschneiderte Log-Botschaften zu ermöglichen. Der
+folgende Code zeigt, wie es geht.
+
+```go
+func main() {
+	// ... 
+
+	// Use log.New() to create a logger for writing information messages.
+	// it takes three parameters:
+	//    - the destination to write the log to (os.Stdout)
+	//    - a string prefix for the message ('INFO\t')
+	//    - flags to indicate what additional messages to include (local date
+	//      and time). Notice that the flags are connected with the pipe symbol
+	//      '|'.
+	infoLog := log.New(os.Stdout, `INFO\t`, log.Ldate|log.Ltime)
+
+	// Now we create a logger for writing error messages in the same way, but use
+	// os.Stderr as the destination and use log.Lshortfile flag to include the
+	// relevant file name and line number
+	errLog := log.New(os.Stderr, `ERROR\t`, log.Ldate|log.Ltime|log.Lshortfile)
+
+	// ...
+
+	// Write messages now using the new loggers, instead of the standard logger
+	infoLog.Printf("starting server at port %s", *port)
+	err := http.ListenAndServe(*port, mux)
+	if err != nil {
+		errLog.Fatalf("Uh oh! %s", err)
+	}
+}
+```
+
+
 ## 2024-06-04 08:05
 
 Mit Hilfe von _Command Line Flags_ können wir spezielle Einstellungen auf der
