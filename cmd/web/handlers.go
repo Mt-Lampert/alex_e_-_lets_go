@@ -37,13 +37,13 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 
 // Add a handler function for creating a snippet.
 func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(`Creating a new snippet ...`))
+	fmt.Fprint(w, `Creating a new snippet ...`)
 }
 
 // Add a handler function for viewing a specific snippet
 func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue(`id`)
-	w.Write([]byte(fmt.Sprintf("Display snippet with ID '%s'", id)))
+	fmt.Fprintf(w, `Display snippet with ID '%s'`, id)
 }
 
 func (app Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +59,7 @@ func (app Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(fmt.Sprintf(`Seems you are looking for something with id '%s'`, rawId)))
+	fmt.Fprintf(w, `Seems you are looking for something with id '%s'`, rawId)
 }
 
 // vim: ts=4 sw=4 fdm=indent

@@ -9,7 +9,7 @@ import (
 // writes an error message and stack trace to the error log.
 // Then it sends a generic 500 Internal Server Error message to the frontend.
 func (app *Application) ServerError(w http.ResponseWriter, err error) {
-	trace := fmt.Sprintf(`%s\n%s`, err.Error(), debug.Stack)
+	trace := fmt.Sprintf(`%s\n%s`, err.Error(), debug.Stack())
 	app.ErrLog.Println(trace)
 
 	http.Error(w,
