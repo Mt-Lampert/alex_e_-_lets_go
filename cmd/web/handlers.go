@@ -23,19 +23,14 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 	// See Journal, 2024-06-03 07:43 for documentation
 	ts, err := template.ParseFiles(templates...)
 	if err != nil {
-		// See Journal, 2024-06-04 19:09 for documentation
-		app.ErrLog.Println(err.Error())
-		http.Error(w, `Internal Server Error has occured!`, http.StatusInternalServerError)
+		app.ServerError(w, err)
 		return
 	}
 
 	// See Journal, 2024-06-03 07:43 for documentation
 	err = ts.ExecuteTemplate(w, `base`, nil)
 	if err != nil {
-		// Because 'handleHome()' is now an 'app' method, it can access its fields,
-		// including the error logger. ⇒ We use this logger now instead of the standard logger.
-		app.ErrLog.Println(err.Error())
-		http.Error(w, `Template Error. WTF?!!`, 500)
+		app.ServerError(w, err)
 		return
 	}
 }
@@ -60,7 +55,7 @@ func (app Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {
 	//    - it must be greater than 0
 	id, err := strconv.Atoi(rawId)
 	if err != nil || id <= 0 {
-		http.Error(w, `invalid ID!`, http.StatusBadRequest)
+		app.ClientError(w, http.StatusBadRequest)
 		return
 	}
 

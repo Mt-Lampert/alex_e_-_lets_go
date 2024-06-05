@@ -7,9 +7,7 @@ import (
 	"os"
 )
 
-// Define an 'app' struct to hold global status for the application.
-// For now we will only include fields for the two custom loggers, but
-// this one will grow and grow and grow over the course of the project.
+// See Journal, 2024-06-04 19:09 for documentation
 type Application struct {
 	ErrLog  *log.Logger
 	InfoLog *log.Logger

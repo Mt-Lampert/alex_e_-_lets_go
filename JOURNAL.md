@@ -5,6 +5,20 @@
 
 ## 2024-06-04 XX:XX
 
+## 2024-06-04 10:28
+
+Wir haben einige Helfer für Fehlerbehandlung implementiert. Die Doku steht vollständig in
+`./cmd/web/helpers.go`, und zwar für `ServerError()`, `ClientError()` und `NotFound()`.
+
+## 2024-06-05 08:45
+
+Die Sache mit der _dependency injection_ funktioniert nur solange wie alle
+Handler im _main_-Package sich befinden. Wenn sie auf mehrere Packages verteilt
+sind (dumm eigentlich; es reicht, sie auf mehrere Dateien im _main_-Package zu
+verteilen), braucht es neue Lösungen.
+
+_Let’s Go_ hat dafür auf S. 146 eine Lösung parat.
+
 ## 2024-06-04 19:09
 
 ### Implementierung der dependency injection
@@ -14,9 +28,9 @@ Als erstes braucht es einen Datentyp, in dem alle globalen Status-Informationen 
 ```go
 // file: ./cmd/web/main.go
 
-// Define an 'app' struct to hold global status for the application.
-// For now we will only include fields for the two custom loggers, but
-// this one will grow and grow and grow over the course of the project.
+// Define an 'Application' struct to hold global status for the application.
+// For now we will only include fields for the two custom loggers, but this one
+// will grow and grow and grow over the course of the project.
 type Application struct {
 	ErrLog  *log.Logger
 	InfoLog *log.Logger
