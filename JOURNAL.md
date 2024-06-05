@@ -5,6 +5,12 @@
 
 ## 2024-06-04 XX:XX
 
+## 2024-06-04 12:10
+
+Habe alles, was mit `http.ServeMux` zu tun hat, aus `main()` in die Funktion
+`app.Routes()` ausgelagert. (Nebenbei habe ich jetzt auch _GoPls_ in Neovim
+integriert. Der Programmier-Spaß hat sich damit verzehnfacht! Läuft!)
+
 ## 2024-06-04 10:28
 
 Wir haben einige Helfer für Fehlerbehandlung implementiert. Die Doku steht vollständig in
