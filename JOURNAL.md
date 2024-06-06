@@ -5,6 +5,92 @@
 
 ## 2024-06-04 XX:XX
 
+## 2024-06-06 18:09
+
+Ich habe jetzt die Sache mit `Sqlc` fürs erste klar gemacht. War schwer genug,
+weil ich nicht einfach dem Buch folgen konnte, sondern irgendwo die richtigen
+SQL-Abfragen finden, abschreiben und anpassen musste. Sie stehen in
+`./internal/schema.sql` und `./internal/query.sql`.
+
+Wie es Sqlc's Art ist, hat es daraus in `./internal/db/' Go-Code generiert, den
+wir jetzt einfach nur noch abrufen müssen. Allerdings gibt es noch einige Dinge
+dringend zu beachten:
+
+```go
+// file: ./internal/db/query.sql.go
+
+// return type for single snippet query
+type GetSnippetRow struct {
+	ID      int64
+	Title   string
+	Content string
+	Created sql.NullTime
+	Ends    interface{}
+}
+
+// return type for snippet list query.
+type GetAllSnippetsRow struct {
+	ID      int64
+	Title   string
+	Content string
+	Created sql.NullTime
+	Ends    interface{}
+}
+```
+
+Das Problem sind die Zeitangaben. `Created` ist als `sql.NullTime` deklariert,
+`Ends` sogar als `interface{}`.
+
+
+#### sql.NullTime
+
+Jaja, _Go_ und die leidigen `NULL`-Einträge in Datenbanken! Wie soll _Go_ mit
+sowas umgehen? Das `database/sql`-Paket bietet für diese Fälle `Null`-Typen an.
+Im Fall von `NullTime` ist dieser Typ so definiert:
+
+```go
+// inside the StdLib database/sql package
+
+type NullTime struct {
+	Time  time.Time
+	Valid bool // Valid is true if Time is not NULL
+}
+```
+
+Das bedeutet für uns in diesem Fall:
+
+1. Wir müssen überprüfen, ob `NullTime.Valid` `true` oder `false` ist:
+2. Wenn `true`, gibt es einen Eintrag, und wir kommen mit `NullTime.Time` heran.
+3. Wenn `false`, ist dieser Eintrag leer und wir müssen die entsprechenden
+   Konsequenzen ziehen.
+
+#### interface{}
+
+Um den Typ `interface{}` in einen String zu überführen (und der Zeitstempel ist
+am Ende nur ein String), genügt folgender Trick:
+
+```go
+func main() {
+	// same format as our 'ends' column
+	var endTimeEntry interface{} = "2018-12-13 18:43:00"
+	// interface{} -> String 
+	endTimeString := fmt.Sprintf("%v", timestamp)
+	// str -> time conversion
+	endTime, err := time.Parse("2006-01-02 03:04:05", endTimeString)
+
+	if err != nil {
+		fmt.Println(`Fuck, man!`, err)
+	}
+
+	// use endTime
+}
+```
+
+Das funktionioniert natürlich nur, weil wir genau wissen, dass wir einen
+Zeitstempel in genau diesem Format von unserem Datenbankmodul geliefert
+bekommen!
+
+
 ## 2024-06-04 12:10
 
 Habe alles, was mit `http.ServeMux` zu tun hat, aus `main()` in die Funktion

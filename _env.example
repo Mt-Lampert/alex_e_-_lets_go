@@ -1,0 +1,3 @@
+DB_ENGINE=sqlite3
+DATABASE=contacts.db
+
