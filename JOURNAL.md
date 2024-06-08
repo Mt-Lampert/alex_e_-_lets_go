@@ -1,9 +1,58 @@
 
 # TODO
 
+- [ ] SQLc-Funktionen dokumentieren (hier im Journal)
+- [ ] 'toTempl'-Funktion für DB-Tupel schreiben
+- [ ] 'toStr'-Funktion für DB-Tupel schreiben; dabei `toTempl()` nutzen
+- [ ] Einzelabfrage vornehmen (mit Ausgabe an INFO; dabei 'toStr()' nutzen)
+
 # JOURNAL
 
 ## 2024-06-04 XX:XX
+
+```go
+// parameter type for InsertSnippet()
+type InsertSnippetParams struct {
+	Title   string
+	Content string
+	Expires sql.NullString
+}
+
+// return type from InsertSnippetParams()
+type InsertSnippetRow struct {
+	ID    int64
+	Title string
+}
+
+func (q *Queries) InsertSnippet(ctx context.Context, arg InsertSnippetParams) (InsertSnippetRow, error) {
+	// [...]
+}
+
+// returns all snippets
+func (q *Queries) GetAllSnippets(ctx context.Context) ([]GetAllSnippetsRow, error) {
+	// [...]
+}
+
+func (q *Queries) GetSnippet(ctx context.Context, id int64) (GetSnippetRow, error) {
+	// [...]
+}
+```
+
+Es ist eigentlich nicht schwer, und es ist auch ganz logisch. Die Typen für die Leseausgabe haben wir schon geklärt.
+Wichtig ist nur noch, dass wir den _context_ mit einbeziehen müssen. Das geht so:
+
+```go
+import "context"
+
+func (app *Application) handleSingleSnippetView(w ResponseWriter, r *http.Request) {
+	ctx = context.Background()
+	rawSnippet, err = db.Qs.GetSnippet(ctx, 2)
+	if err != nil {
+		// => "Ach Scheiße!"
+	}
+	// [...]
+}
+```
 
 ## 2024-06-06 18:09
 

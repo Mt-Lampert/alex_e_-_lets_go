@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
 )
 
 func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
@@ -42,8 +45,23 @@ func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) 
 
 // Add a handler function for viewing a specific snippet
 func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue(`id`)
-	fmt.Fprintf(w, `Display snippet with ID '%s'`, id)
+	ctx := context.Background()
+
+	idBE := r.PathValue(`id`)
+	idDB, err := strconv.ParseInt(idBE, 10, 64)
+	if err != nil {
+		app.ServerError(w, err)
+		return
+	}
+
+	resultRaw, err := db.Qs.GetSnippet(ctx, idDB)
+	if err != nil {
+		app.ServerError(w, err)
+		return
+	}
+
+	app.InfoLog.Println(`entry found!`)
+	fmt.Fprintf(w, "We got something. Hallelujah!\n    id: '%d';\n    title: '%s'", resultRaw.ID, resultRaw.Title)
 }
 
 func (app Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {

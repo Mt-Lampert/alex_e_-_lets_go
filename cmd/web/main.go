@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
 )
 
 // See Journal, 2024-06-04 19:09 for documentation
@@ -14,6 +16,10 @@ type Application struct {
 }
 
 func main() {
+
+	// initializing the database module
+	db.Setup()
+
 	// See Journal, 2024-06-04 08:05 for documentation
 	port := flag.String(`port`, `:3000`, "setting the port number")
 	flag.Parse()
