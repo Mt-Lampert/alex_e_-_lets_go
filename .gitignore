@@ -1,6 +1,7 @@
 .env
 go.sum
 snippets.db
+snippets.bak.db
 tmp/
 internal/db/db.go
 internal/db/models.go
