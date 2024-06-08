@@ -64,6 +64,25 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 	fmt.Fprintf(w, "We got something. Hallelujah!\n    id: '%d';\n    title: '%s'", resultRaw.ID, resultRaw.Title)
 }
 
+func (app *Application) handleSnippetList(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	output := "We found snippets. Hallelujah!\n"
+
+	resultsRaw, err := db.Qs.GetAllSnippets(ctx)
+	if err != nil {
+		app.ServerError(w, err)
+		return
+	}
+
+	app.InfoLog.Println(`snippets found!`)
+	for _, sn := range resultsRaw {
+		output += fmt.Sprintf("       id: '%d'\n", sn.ID)
+		output += fmt.Sprintf("    title: '%s'\n\n", sn.Title)
+	}
+
+	fmt.Fprint(w, output)
+}
+
 func (app Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {
 	// get the id
 	rawId := r.URL.Query().Get(`id`)
