@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -40,7 +41,26 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 
 // Add a handler function for creating a snippet.
 func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, `Creating a new snippet ...`)
+	ctx := context.Background()
+	output := "Inserted new Snippet:\n"
+	params2Insert := db.InsertSnippetParams{
+		Title:   `So ein Dummy`,
+		Content: `Ich bin ja so ein Dummy!`,
+		Expires: sql.NullString{Valid: true, String: `30 days`},
+	}
+
+	feedback, err := db.Qs.InsertSnippet(ctx, params2Insert)
+	if err != nil {
+		app.ServerError(w, err)
+		return
+	}
+
+	app.InfoLog.Println("Inserted new entry!")
+
+	output += fmt.Sprintf("    id: %d\n", feedback.ID)
+	output += fmt.Sprintf("    title: '%s'\n\n", feedback.Title)
+
+	fmt.Fprint(w, output)
 }
 
 // Add a handler function for viewing a specific snippet
