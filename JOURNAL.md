@@ -8,7 +8,48 @@
 
 # JOURNAL
 
-## 2024-06-04 XX:XX
+## 2024-06-10 XX:XX
+
+## 2024-06-10 17:56
+
+Jetzt zur eigentlichen Doku:
+
+Ich musste noch einen Konvertierungs-Helfer schreiben, der das „Rohergebnis“
+der SQL-Abfrage in ein wohlgeformtes Template-Objekt überführt. Ist am Ende
+ziemlich einfach geworden.
+
+Die Arbeit mit Templates erfolgt immer nach dem gleichen Schema. Ich habe es
+unten beschrieben. Das ist nervig, aber wenn man sich mal daran gewöhnt hat,
+ist es OK.
+
+## 2024-06-10 17:40
+
+Hab mich in den totalen Frust gearbeitet – weil ich ein paar entscheidende Denkfehler gemacht habe:
+
+1. Wenn ich im Go-Code „völlig unerklärlicherweise“ gesagt bekomme, dass eine
+   Methode oder ein Attribut undefined ist, obwohl ich sie nachweislich definiert habe,
+   dann habe ich wahrscheinlich das Objekt mit dem Typen verwechselt:
+
+   ```go
+// WRONG:
+// createdTpl = db.GetSnippetRow.Created.Time.Format("2006-01-02 03:04:05")
+// CORRECT:
+createdTpl = r.Created.Time.Format("2006-01-02 03:04:05")
+   ```
+   
+   `r` ist vom Typ her ein `db.GetSnippetRow`; schon richtig ...
+
+2. Ein riesiges Problem erwuchs mir daraus, dass ich folgenden Fehler gemacht habe:
+
+   ```go
+// WRONG
+// http.Handle(`/static/`, http.StripPrefix(`/static`, fileServer))
+// CORRECT
+mux.Handle(`/static/`, http.StripPrefix(`/static`, fileServer))
+   ```
+   `http.Handle` ist nicht mit unserem extra erstellten Spezial-Router verdrahtet,
+   sondern mit `http.DefaultMux`! Deshalb wurde z.B. die CSS-Datei nicht mehr
+   an den Browser geladen ...
 
 
 ## 2024-06-10 05:23
@@ -35,7 +76,8 @@ if err != nil {
 
 ## 2024-06-07 07:14
 
-SQLc wurde erfolgreich installiert und integriert; hier ist die Dokumentation über die Features, die SQLc zur Verfügung stellt.
+SQLc wurde erfolgreich installiert und integriert; hier ist die Dokumentation
+über die Features, die SQLc zur Verfügung stellt.
 
 ```go
 // parameter type for InsertSnippet()
@@ -65,8 +107,9 @@ func (q *Queries) GetSnippet(ctx context.Context, id int64) (GetSnippetRow, erro
 }
 ```
 
-Es ist eigentlich nicht schwer, und es ist auch ganz logisch. Die Typen für die Leseausgabe haben wir schon geklärt.
-Wichtig ist nur noch, dass wir den _context_ mit einbeziehen müssen. Das geht so:
+Es ist eigentlich nicht schwer, und es ist auch ganz logisch. Die Typen für die
+Leseausgabe haben wir schon geklärt. Wichtig ist nur noch, dass wir den
+_context_ mit einbeziehen müssen. Das geht so:
 
 ```go
 import "context"

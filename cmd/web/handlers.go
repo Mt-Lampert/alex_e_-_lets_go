@@ -13,11 +13,6 @@ import (
 )
 
 func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
-	//exclude anything but root as endpoint
-	if r.URL.Path != `/` {
-		http.NotFound(w, r)
-		return
-	}
 
 	templates := []string{
 		"./ui/html/base.go.html",
@@ -71,7 +66,7 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 	idBE := r.PathValue(`id`)
 	idDB, err := strconv.ParseInt(idBE, 10, 64)
 	if err != nil {
-		app.ServerError(w, err)
+		app.NotFound(w)
 		return
 	}
 
@@ -85,8 +80,28 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	app.InfoLog.Println(`entry found!`)
-	fmt.Fprintf(w, "We got something. Hallelujah!\n    id: '%d';\n    title: '%s'", resultRaw.ID, resultRaw.Title)
+	resultTpl := app.ResultRawToTpl(resultRaw)
+
+	// Initialize a slice containing the paths to the 'view.go.html' file
+	// plus the base layout and navigation partial that we made earlier.
+	myTemplates := []string{
+		"./ui/html/base.go.html",
+		"./ui/html/partials/nav.go.html",
+		"./ui/html/pages/view.go.html",
+	}
+
+	// Parse the templates
+	ts, err := template.ParseFiles(myTemplates...)
+	if err != nil {
+		app.ServerError(w, err)
+		return
+	}
+
+	// Now execute them. Notice how we pass in the snippet data and the final
+	// parameter
+	if err = ts.ExecuteTemplate(w, "base", resultTpl); err != nil {
+		app.ServerError(w, err)
+	}
 }
 
 func (app *Application) handleSnippetList(w http.ResponseWriter, r *http.Request) {

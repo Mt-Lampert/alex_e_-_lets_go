@@ -16,7 +16,6 @@ type Application struct {
 }
 
 func main() {
-
 	// initializing the database module
 	db.Setup()
 

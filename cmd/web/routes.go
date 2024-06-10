@@ -11,10 +11,10 @@ func (app *Application) Routes() *http.ServeMux {
 	// Register the fileServer for all URL paths that start with '/static/'.
 	// For matching paths, we strip the '/static' prefix before the request
 	// reaches the fileServer.
-	http.Handle(`/static/`, http.StripPrefix(`/static`, fileServer))
+	mux.HandleFunc(`GET /home`, app.handleHome)
+	mux.Handle(`/static/`, http.StripPrefix(`/static`, fileServer))
 
 	// Endpoints with handlers as app methods
-	mux.HandleFunc(`GET /`, app.handleHome)
 	mux.HandleFunc(`GET /urlquery`, app.handleUrlQuery)
 
 	mux.HandleFunc(`GET /snippets/`, app.handleSnippetList)
