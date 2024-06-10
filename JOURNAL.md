@@ -1,11 +1,6 @@
 
 # TODO
 
-- [x] SQLc-Funktionen dokumentieren (hier im Journal)
-- [ ] 'toTempl'-Funktion für DB-Tupel schreiben
-- [x] 'toStr'-Funktion für DB-Tupel schreiben; dabei `toTempl()` nutzen
-- [x] Einzelabfrage vornehmen (mit Ausgabe an INFO; dabei 'toStr()' nutzen)
-
 # JOURNAL
 
 ## 2024-06-10 XX:XX
@@ -30,26 +25,26 @@ Hab mich in den totalen Frust gearbeitet – weil ich ein paar entscheidende Den
    Methode oder ein Attribut undefined ist, obwohl ich sie nachweislich definiert habe,
    dann habe ich wahrscheinlich das Objekt mit dem Typen verwechselt:
 
-   ```go
+```go
 // WRONG:
 // createdTpl = db.GetSnippetRow.Created.Time.Format("2006-01-02 03:04:05")
 // CORRECT:
 createdTpl = r.Created.Time.Format("2006-01-02 03:04:05")
-   ```
-   
-   `r` ist vom Typ her ein `db.GetSnippetRow`; schon richtig ...
+// yes, 'r' is a 'db.GetSnippetRow', that's correct ...
+```
+
 
 2. Ein riesiges Problem erwuchs mir daraus, dass ich folgenden Fehler gemacht habe:
+   im falschen Beispiel ist `http.Handle` nicht mit unserem extra erstellten
+   Spezial-Router verdrahtet, sondern mit `http.DefaultMux`! Deshalb wurde z.B.
+   die CSS-Datei nicht mehr an den Browser geladen ...
 
-   ```go
+```go
 // WRONG
 // http.Handle(`/static/`, http.StripPrefix(`/static`, fileServer))
 // CORRECT
 mux.Handle(`/static/`, http.StripPrefix(`/static`, fileServer))
-   ```
-   `http.Handle` ist nicht mit unserem extra erstellten Spezial-Router verdrahtet,
-   sondern mit `http.DefaultMux`! Deshalb wurde z.B. die CSS-Datei nicht mehr
-   an den Browser geladen ...
+```
 
 
 ## 2024-06-10 05:23
