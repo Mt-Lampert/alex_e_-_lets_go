@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -76,7 +77,11 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 
 	resultRaw, err := db.Qs.GetSnippet(ctx, idDB)
 	if err != nil {
-		app.ServerError(w, err)
+		if errors.Is(err, sql.ErrNoRows) {
+			app.NotFound(w)
+		} else {
+			app.ServerError(w, err)
+		}
 		return
 	}
 

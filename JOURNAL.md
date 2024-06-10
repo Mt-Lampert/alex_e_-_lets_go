@@ -1,14 +1,41 @@
 
 # TODO
 
-- [ ] SQLc-Funktionen dokumentieren (hier im Journal)
+- [x] SQLc-Funktionen dokumentieren (hier im Journal)
 - [ ] 'toTempl'-Funktion für DB-Tupel schreiben
-- [ ] 'toStr'-Funktion für DB-Tupel schreiben; dabei `toTempl()` nutzen
-- [ ] Einzelabfrage vornehmen (mit Ausgabe an INFO; dabei 'toStr()' nutzen)
+- [x] 'toStr'-Funktion für DB-Tupel schreiben; dabei `toTempl()` nutzen
+- [x] Einzelabfrage vornehmen (mit Ausgabe an INFO; dabei 'toStr()' nutzen)
 
 # JOURNAL
 
 ## 2024-06-04 XX:XX
+
+
+## 2024-06-10 05:23
+
+Es gibt noch eine Ergänzung zu SQLc: die Fehlerbehandlung.
+
+Was passiert, wenn eine Abfrage kein Ergebnis liefert? In diesem Fall gibt SQLc
+einen `sql.ErrNoRows` zurück. Auf den können wir entsprechend reagieren:
+
+```go
+resultRaw, err := db.Qs.GetSnippet(ctx, idDB)
+if err != nil {
+	if errors.Is(err, sql.ErrNoRows) {
+		// => 404 error
+		app.NotFound(w)
+	} else {
+		// => 500 error
+		app.ServerError(w, err)
+	}
+	return
+}
+```
+
+
+## 2024-06-07 07:14
+
+SQLc wurde erfolgreich installiert und integriert; hier ist die Dokumentation über die Features, die SQLc zur Verfügung stellt.
 
 ```go
 // parameter type for InsertSnippet()
