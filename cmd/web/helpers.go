@@ -41,6 +41,7 @@ func (app *Application) NotFound(w http.ResponseWriter) {
 	app.ClientError(w, http.StatusNotFound)
 }
 
+// converts a single DB snippet into a snippet for use in templates
 func (app *Application) ResultRawToTpl(r db.GetSnippetRow) TplSnippet {
 	id := strconv.Itoa(int(r.ID))
 	var createdTpl string
@@ -59,6 +60,29 @@ func (app *Application) ResultRawToTpl(r db.GetSnippetRow) TplSnippet {
 		Expires: myExpiresTpl,
 	}
 
+}
+
+// converts a slice of raw DB snippets into snippets for use in templates
+func (app *Application) RawSnippetsToTpl(rs []db.GetAllSnippetsRow) []TplSnippet {
+	lenRS := cap(rs)
+	var createdTpl string
+	var tsp = make([]TplSnippet, lenRS)
+
+	for i, r := range rs {
+		id := strconv.Itoa(int(r.ID))
+		if r.Created.Valid {
+			createdTpl = r.Created.Time.Format("2006-01-02 03:04:05")
+		}
+		myExpiresTpl := fmt.Sprintf("%v", r.Ends)
+		tsp[i] = TplSnippet{
+			ID:      id,
+			Title:   r.Title,
+			Content: r.Content,
+			Created: createdTpl,
+			Expires: myExpiresTpl,
+		}
+	}
+	return tsp
 }
 
 // vim: ts=4 sw=4 fdm=indent

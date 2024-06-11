@@ -13,12 +13,28 @@ import (
 )
 
 func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
 	templates := []string{
 		"./ui/html/base.go.html",
 		"./ui/html/pages/home.go.html",
 		"./ui/html/partials/nav.go.html",
 	}
 
+	rawSnippets, err := db.Qs.GetAllSnippets(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			app.NotFound(w)
+		} else {
+			app.ServerError(w, err)
+		}
+		return
+	}
+
+	tplSnippets := app.RawSnippetsToTpl(rawSnippets)
+
+	data := &templateData{
+		Snippets: tplSnippets,
+	}
 	// See Journal, 2024-06-03 07:43 for documentation
 	ts, err := template.ParseFiles(templates...)
 	if err != nil {
@@ -27,7 +43,7 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// See Journal, 2024-06-03 07:43 for documentation
-	err = ts.ExecuteTemplate(w, `base`, nil)
+	err = ts.ExecuteTemplate(w, `base`, data)
 	if err != nil {
 		app.ServerError(w, err)
 		return
