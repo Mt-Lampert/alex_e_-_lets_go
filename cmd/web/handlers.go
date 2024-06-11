@@ -13,7 +13,6 @@ import (
 )
 
 func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
-
 	templates := []string{
 		"./ui/html/base.go.html",
 		"./ui/html/pages/home.go.html",
@@ -82,6 +81,10 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 
 	resultTpl := app.ResultRawToTpl(resultRaw)
 
+	data := &templateData{
+		Snippet: resultTpl,
+	}
+
 	// Initialize a slice containing the paths to the 'view.go.html' file
 	// plus the base layout and navigation partial that we made earlier.
 	myTemplates := []string{
@@ -99,7 +102,7 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 
 	// Now execute them. Notice how we pass in the snippet data and the final
 	// parameter
-	if err = ts.ExecuteTemplate(w, "base", resultTpl); err != nil {
+	if err = ts.ExecuteTemplate(w, "base", data); err != nil {
 		app.ServerError(w, err)
 	}
 }
