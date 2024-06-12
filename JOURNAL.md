@@ -3,7 +3,70 @@
 
 # JOURNAL
 
-## 2024-06-XX XX:XX
+<!-- ## 2024-06-XX XX:XX -->
+
+## 2024-06-12 19:36
+
+Nice to know: das _template_-Package aus der Standard-Lib hat noch ein
+besonderes Schmankerl: das `FuncMap`-Objekt. Mit dieser Funktion können wir
+eigene Template-Funktionen für unsere Arbeit innerhalb der Templates hinzufügen
+– und die funktionionieren dann genauso wie die etablierten Template-Funktionen
+wie `printf` oder `len` oder `index` (vgl. Abschnitt 5.2 im Buch)
+
+Hier das Rezept (im Rahmen dieses Projekts)
+
+```go
+// define the function we want as template function
+// -1-
+func tplFoo(arg1 string, num int) string {
+	// [...]
+}
+
+// initialize a FuncMap Object as a global variable and add the function we
+// just defined
+// -2-
+var tplFunctions = template.FuncMap{ `tplFoo`: tplFoo }
+
+
+func buildTemplateCache() (map[string]*template.Template, error) {
+	// [...]
+	// build a new template set from scratch
+	// -3-
+	ts := template.New(name)
+	// add the FuncMap Object from above ...
+	// -3-
+	ts.Funcs(tplFunctions)
+	// ... BEFORE you parse the first template
+	ts.ParseFiles(`./ui/html/base.go.html`)
+	if err != nil {
+		return nil, err
+	}
+	// [...]
+
+	return ts, nil
+}
+
+// use the function in the template 
+// -4-
+// {{ tplFoo 'theString' 42 }}
+
+```
+
+#### Anmerkungen
+
+1. Die neue Template-Funktion darf so viele Argumente aufnehmen wie wir wollen,
+   aber sie darf nur __einen__ Rückgabewert haben, und der sollte _dringend
+   entweder vom Typ `string` oder vom Typ `bool` oder vom Typ `int` sein!
+2. `tplFunctions` müssen global sein, damit jede Funktion im Package darauf
+   zugreifen kann.
+3. `template.Funcs` funktioniert nur bei einem bereits existierenden
+   `template`-Objekt, deshalb müssen wir es vorher mit `New()` erstellen.
+4. In diesem Beispiel ist der Rückgabewert ein `string`, und deshalb kann er
+   direkt im Template eingetragen werden.
+
+Übrigens: Nach dieser Methode wurden alle speziellen Template-Funktionen in
+_Hugo_ implementiert.
+
 
 ## 2024-06-12 18:51
 
