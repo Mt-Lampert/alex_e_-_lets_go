@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -10,9 +11,11 @@ import (
 )
 
 // See Journal, 2024-06-04 19:09 for documentation
+// Adding a template cache struct
 type Application struct {
-	ErrLog  *log.Logger
-	InfoLog *log.Logger
+	ErrLog        *log.Logger
+	InfoLog       *log.Logger
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -27,11 +30,18 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
+	// build instance of a template cache
+	templateCache, err := buildTemplateCache()
+	if err != nil {
+		errLog.Fatal(err)
+	}
+
 	// introduce the app Object in order to grant access to the global
 	// application state.
 	app := &Application{
-		ErrLog:  errLog,
-		InfoLog: infoLog,
+		ErrLog:        errLog,
+		InfoLog:       infoLog,
+		templateCache: templateCache,
 	}
 
 	// create new servemux (router) where all Routing is initialized.
@@ -46,7 +56,7 @@ func main() {
 
 	infoLog.Printf("starting server at port %s", *port)
 	// now call the 'ListenAndServe()' method of our own http.Server version
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	if err != nil {
 		errLog.Fatalf("Uh oh! %s", err)
 	}

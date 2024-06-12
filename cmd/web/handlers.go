@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
 
@@ -14,12 +13,6 @@ import (
 
 func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	templates := []string{
-		"./ui/html/base.go.html",
-		"./ui/html/pages/home.go.html",
-		"./ui/html/partials/nav.go.html",
-	}
-
 	rawSnippets, err := db.Qs.GetAllSnippets(ctx)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -29,25 +22,9 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
 	tplSnippets := app.RawSnippetsToTpl(rawSnippets)
 
-	data := &templateData{
-		Snippets: tplSnippets,
-	}
-	// See Journal, 2024-06-03 07:43 for documentation
-	ts, err := template.ParseFiles(templates...)
-	if err != nil {
-		app.ServerError(w, err)
-		return
-	}
-
-	// See Journal, 2024-06-03 07:43 for documentation
-	err = ts.ExecuteTemplate(w, `base`, data)
-	if err != nil {
-		app.ServerError(w, err)
-		return
-	}
+	app.Render(w, http.StatusOK, `home.go.html`, &templateData{Snippets: tplSnippets})
 }
 
 // Add a handler function for creating a snippet.
@@ -97,30 +74,32 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 
 	resultTpl := app.ResultRawToTpl(resultRaw)
 
-	data := &templateData{
-		Snippet: resultTpl,
-	}
+	// data := &templateData{
+	// 	Snippet: resultTpl,
+	// }
 
 	// Initialize a slice containing the paths to the 'view.go.html' file
 	// plus the base layout and navigation partial that we made earlier.
-	myTemplates := []string{
-		"./ui/html/base.go.html",
-		"./ui/html/partials/nav.go.html",
-		"./ui/html/pages/view.go.html",
-	}
+	// myTemplates := []string{
+	// 	"./ui/html/base.go.html",
+	// 	"./ui/html/partials/nav.go.html",
+	// 	"./ui/html/pages/view.go.html",
+	// }
 
 	// Parse the templates
-	ts, err := template.ParseFiles(myTemplates...)
-	if err != nil {
-		app.ServerError(w, err)
-		return
-	}
+	// ts, err := template.ParseFiles(myTemplates...)
+	// if err != nil {
+	// 	app.ServerError(w, err)
+	// 	return
+	// }
 
 	// Now execute them. Notice how we pass in the snippet data and the final
 	// parameter
-	if err = ts.ExecuteTemplate(w, "base", data); err != nil {
-		app.ServerError(w, err)
-	}
+	// if err = ts.ExecuteTemplate(w, "base", data); err != nil {
+	// 	app.ServerError(w, err)
+	// }
+
+	app.Render(w, http.StatusOK, `view.go.html`, &templateData{Snippet: resultTpl})
 }
 
 func (app *Application) handleSnippetList(w http.ResponseWriter, r *http.Request) {

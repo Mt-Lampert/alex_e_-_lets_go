@@ -64,8 +64,8 @@ func (app *Application) ResultRawToTpl(r db.GetSnippetRow) TplSnippet {
 
 // converts a slice of raw DB snippets into snippets for use in templates
 func (app *Application) RawSnippetsToTpl(rs []db.GetAllSnippetsRow) []TplSnippet {
-	lenRS := cap(rs)
 	var createdTpl string
+	lenRS := cap(rs)
 	var tsp = make([]TplSnippet, lenRS)
 
 	for i, r := range rs {
@@ -83,6 +83,28 @@ func (app *Application) RawSnippetsToTpl(rs []db.GetAllSnippetsRow) []TplSnippet
 		}
 	}
 	return tsp
+}
+
+// renders templates and sends them to the frontend
+func (app *Application) Render(
+	w http.ResponseWriter,
+	status int,
+	page string,
+	data *templateData,
+) {
+	ts, ok := app.templateCache[page]
+	if !ok {
+		err := fmt.Errorf("the template '%s' does not exist", page)
+		app.ServerError(w, err)
+		return
+	}
+
+	w.WriteHeader(status)
+
+	err := ts.ExecuteTemplate(w, `base`, data)
+	if err != nil {
+		app.ServerError(w, err)
+	}
 }
 
 // vim: ts=4 sw=4 fdm=indent
