@@ -25,15 +25,24 @@ func buildTemplateCache() (map[string]*template.Template, error) {
 		// extract the basename of 'page'
 		name := filepath.Base(page)
 
-		// build a bundle of required templates for a file
-		files := []string{
-			`./ui/html/base.go.html`,
-			`./ui/html/partials/nav.go.html`,
-			page,
+		// parse the base template file into a template set
+		ts, err := template.ParseFiles(`./ui/html/base.go.html`)
+		if err != nil {
+			return nil, err
 		}
 
-		// build a corresponding bundle of 'compiled' raw templates
-		ts, err := template.ParseFiles(files...)
+		// parse all possible partials files into this very template set to add them there
+		// notice how the 'old' ts on the right side creates a new enhanced ts
+		// on the left hand of '='
+		ts, err = ts.ParseGlob(`./ui/html/partials/*.go.html`)
+		if err != nil {
+			return nil, err
+		}
+
+		// parse the current page file into this very template set to add it there
+		// notice how the 'old' ts on the right side creates a new enhanced ts
+		// on the left hand of '='
+		ts, err = ts.ParseFiles(page)
 		if err != nil {
 			return nil, err
 		}

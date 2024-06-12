@@ -5,11 +5,14 @@
 
 ## 2024-06-10 XX:XX
 
+## 2024-06-10 XX:XX
 
 ## 2024-06-12 11:18
 
-Großes Refactoring: Ich habe den Render-Vorgang der Templates in einer allgemeinen Hilfsfunktion (`app.Render()`) zusammengefasst.
-In den Handlern ließ sich dadurch eine Menge Code einsparen (vgl. die Veränderungen in diesem Commit).
+Großes Refactoring: Ich habe den Render-Vorgang der Templates in einer
+allgemeinen Hilfsfunktion (`app.Render()`) zusammengefasst. In den Handlern
+ließ sich dadurch eine Menge Code einsparen (vgl. die Veränderungen in diesem
+Commit).
 
 Folgende Dateien waren betroffen:
 

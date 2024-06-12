@@ -71,33 +71,7 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 		}
 		return
 	}
-
 	resultTpl := app.ResultRawToTpl(resultRaw)
-
-	// data := &templateData{
-	// 	Snippet: resultTpl,
-	// }
-
-	// Initialize a slice containing the paths to the 'view.go.html' file
-	// plus the base layout and navigation partial that we made earlier.
-	// myTemplates := []string{
-	// 	"./ui/html/base.go.html",
-	// 	"./ui/html/partials/nav.go.html",
-	// 	"./ui/html/pages/view.go.html",
-	// }
-
-	// Parse the templates
-	// ts, err := template.ParseFiles(myTemplates...)
-	// if err != nil {
-	// 	app.ServerError(w, err)
-	// 	return
-	// }
-
-	// Now execute them. Notice how we pass in the snippet data and the final
-	// parameter
-	// if err = ts.ExecuteTemplate(w, "base", data); err != nil {
-	// 	app.ServerError(w, err)
-	// }
 
 	app.Render(w, http.StatusOK, `view.go.html`, &templateData{Snippet: resultTpl})
 }
