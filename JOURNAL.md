@@ -5,7 +5,37 @@
 
 ## 2024-06-10 XX:XX
 
-## 2024-06-10 XX:XX
+## 2024-06-10 17:06
+
+habe die `buildTemplateCache()` jetzt derart erweitert, dass sie automatisch
+_alle_ möglichen Partials in den Template-Cache aufnimmt.
+
+Ganz besonders dieser Trick hier war dabei hilfreich:
+
+```go
+// [...]
+
+// parse the base template file into a template set
+ts, err := template.ParseFiles(`./ui/html/base.go.html`)
+if err != nil {
+	return nil, err
+}
+
+// parse all possible partials files into this very template set to add them there
+// notice how the 'old' ts on the right side creates a new enhanced ts
+// on the left hand of '='
+ts, err = ts.ParseGlob(`./ui/html/partials/*.go.html`)
+if err != nil {
+	return nil, err
+}
+
+// [...]
+```
+
+Im oberen Block wird `ts` neu angelegt. Im unteren Block wird _genau dieses_
+`ts` benutzt, um die Partials hinzu zu addieren und sich selbst „neu zu
+erfinden“. 
+
 
 ## 2024-06-12 11:18
 
