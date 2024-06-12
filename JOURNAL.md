@@ -30,20 +30,22 @@ var tplFunctions = template.FuncMap{ `tplFoo`: tplFoo }
 
 func buildTemplateCache() (map[string]*template.Template, error) {
 	// [...]
-	// build a new template set from scratch
-	// -3-
-	ts := template.New(name)
-	// add the FuncMap Object from above ...
-	// -3-
-	ts.Funcs(tplFunctions)
-	// ... BEFORE you parse the first template
-	ts.ParseFiles(`./ui/html/base.go.html`)
-	if err != nil {
-		return nil, err
+	// for each page template
+	for _, page := range pages {
+		// build a new template set from scratch
+		// -3-
+		ts := template.New(name)
+		// add the FuncMap Object from above ...
+		// -3-
+		ts.Funcs(tplFunctions)
+		// ... BEFORE you parse the first template
+		ts.ParseFiles(`./ui/html/base.go.html`)
+		if err != nil {
+			return nil, err
+		}
+		// [...]
 	}
 	// [...]
-
-	return ts, nil
 }
 
 // use the function in the template 
