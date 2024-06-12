@@ -24,7 +24,11 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 	}
 	tplSnippets := app.RawSnippetsToTpl(rawSnippets)
 
-	app.Render(w, http.StatusOK, `home.go.html`, &templateData{Snippets: tplSnippets})
+	// create data object
+	data := app.buildTemplateData()
+	data.Snippets = tplSnippets
+
+	app.Render(w, http.StatusOK, `home.go.html`, data)
 }
 
 // Add a handler function for creating a snippet.
@@ -73,7 +77,11 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 	}
 	resultTpl := app.ResultRawToTpl(resultRaw)
 
-	app.Render(w, http.StatusOK, `view.go.html`, &templateData{Snippet: resultTpl})
+	// create data object
+	data := app.buildTemplateData()
+	data.Snippet = resultTpl
+
+	app.Render(w, http.StatusOK, `view.go.html`, data)
 }
 
 func (app *Application) handleSnippetList(w http.ResponseWriter, r *http.Request) {

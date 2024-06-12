@@ -3,9 +3,21 @@
 
 # JOURNAL
 
-## 2024-06-10 XX:XX
+## 2024-06-XX XX:XX
 
-## 2024-06-10 17:06
+## 2024-06-12 18:51
+
+In diesem Commit habe ich _Shared Data_ in einem sehr einfachen Fall
+implementiert: Es ging darum, das aktuelle Jahr im Footer anzuzeigen.
+Änderungen in diesen Dateien waren dafür nötig:
+
+- `cmd/web/templates.go`: hier wurde `templateData` erweitert.
+- `cmd/web/helpers.go`: hier wurde eine Factory Function angelegt (`app.buildTemplateData()`)
+- `cmd/web/handlers.go`: hier wurde die Factory Function aufgerufen
+- `ui/html/base.go.html`: hier wurde in Änderung im Template umgesetzt
+
+
+## 2024-06-12 17:06
 
 habe die `buildTemplateCache()` jetzt derart erweitert, dass sie automatisch
 _alle_ möglichen Partials in den Template-Cache aufnimmt.

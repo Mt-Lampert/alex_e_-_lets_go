@@ -7,8 +7,9 @@ import (
 
 // a convenient wrapper for template data (usually from the DB)
 type templateData struct {
-	Snippet  TplSnippet
-	Snippets []TplSnippet
+	CurrentYear int
+	Snippet     TplSnippet
+	Snippets    []TplSnippet
 }
 
 func buildTemplateCache() (map[string]*template.Template, error) {

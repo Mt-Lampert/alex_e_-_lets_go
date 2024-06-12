@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"runtime/debug"
 	"strconv"
+	"time"
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
 )
@@ -105,6 +106,11 @@ func (app *Application) Render(
 	if err != nil {
 		app.ServerError(w, err)
 	}
+}
+
+// factory helper to build a templateData instance
+func (app *Application) buildTemplateData() *templateData {
+	return &templateData{CurrentYear: time.Now().Year()}
 }
 
 // vim: ts=4 sw=4 fdm=indent
