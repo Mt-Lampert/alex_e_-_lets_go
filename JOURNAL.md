@@ -5,6 +5,41 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-18 13:24
+
+Premiere: Wir haben die erste _Middleware_ eingefügt – um mit Hilfe von Headern
+die Sicherheit im Browser zu erhöhen. Hat uns sechs Tage gekostet, weil ich
+wichtige Vorarbeiten zu leisten hatte, z.B. wie man selbst geschriebene
+_Snippets_ in Neovim-Kickstart erfolgreich integriert. Aber das ist nun geschafft.
+
+Die Middleware findet sich in der Datei `cmd/web/middleware.go`, beim Einbau in
+der `routes()`-Funktion gibt es allerdings einige Dinge für den Umgang mit
+Middleware zu beachten:
+
+```go
+// -1-
+func (app *Application) Routes() http.Handler {
+	mux := http.NewServeMux()
+
+	// [ setting up mux ]
+
+	// including 'mux' into the general 'secureHeaders()' middleware
+	// -2-
+	return secureHeaders(mux)
+}
+```
+#### Anmerkungen
+
+1. Wenn eine allgemeine Middleware zum Einsatz kommt, müssen wir den
+   Rückgabetyp von `app.Routes()` nach `http.Handler` ändern. Vorher war er
+   `*http.ServeMux`; in der Sache ändert das nichts, weil http.Handler ein
+   _Interface_ ist und `*http.ServeMux` dieses Interface implementiert hat.
+0. Wie wir in _Obsidian_ schon geklärt haben, besteht das Wesen von Middleware
+   darin, den „nächsten Facharbeiter“ als Argument „einzuklammern“. Hier
+   klammert `secureHeaders()` das `mux`-Objekt ein, und da es das komplette 
+   `mux`-Objekt einklammert, ist es eine allgemeine Middleware.
+
+
 ## 2024-06-12 19:36
 
 Nice to know: das _template_-Package aus der Standard-Lib hat noch ein

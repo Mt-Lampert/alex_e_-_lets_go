@@ -2,7 +2,8 @@ package main
 
 import "net/http"
 
-func (app *Application) Routes() *http.ServeMux {
+// Single source of truth for routing in this app
+func (app *Application) Routes() http.Handler {
 	mux := http.NewServeMux()
 
 	// see Journal: 2024-06-04 for documentation
@@ -21,7 +22,7 @@ func (app *Application) Routes() *http.ServeMux {
 	mux.HandleFunc(`GET /snippets/{id}`, app.handleSingleSnippetView)
 	mux.HandleFunc(`POST /snippets/new`, app.handleNewSnippet)
 
-	return mux
+	return secureHeaders(mux)
 }
 
 // vim: ts=4 sw=4 fdm=indent
