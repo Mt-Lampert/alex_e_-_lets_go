@@ -5,6 +5,11 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-18 14:39
+
+Hab jetzt auch die nächste Middleware implementiert. War mit dem neuen Snippet ein Klax!
+Ohne die ganze Doku und das Update des Snippetswäre das in 10 min fertig geworden.
+
 ## 2024-06-18 13:24
 
 Premiere: Wir haben die erste _Middleware_ eingefügt – um mit Hilfe von Headern
