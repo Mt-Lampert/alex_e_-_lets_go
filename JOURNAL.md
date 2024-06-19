@@ -5,6 +5,52 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-19 18:08
+
+Anstelle des Extra-Pakets, das Alex Edwards vorgeschlagen hat, habe ich hier etwas eigenes
+aufgebaut, das ich mir von [diesem Video]() (Ab 07:43) geklaut habe.
+
+```go
+// file: ./cmd/web/middleware.go
+
+// new type representing a middleware function
+type Middleware func(http.Handler) http.Handler
+
+func createMdwChain(xs ...Middleware) Middleware {
+	return func(next http.Handler) http.Handler {
+		// building a 'triangle' of nested middleware functions.
+		// we are moving bottom-up in the 'xs' list that has been passed to us!
+		for i := len(xs) - 1; i >= 0; i-- {
+			// xs[i] is the current Middleware function in the list
+			x := xs[i]
+			// x(next) is the return value of the current Middleware function.
+			// This is what creates the nested function calls!
+			next = x(next)
+		}
+		return next
+	}
+}
+```
+
+Das funktioniert, weil die _Go Runtime_ beim Aufruf von `createMdwChain()` nur den „äußersten Rahmen“, also nur die Closure zurückgibt	– ohne sie auszuführen. Dafür „weiß“ die Closure an dieser Stelle schon ganz genau, woraus sich `xs` zusammensetzt. Erst wenn diese „scharf gemachte Closure“ dann tatsächlich aufgerufen wird, rattert ihre `for`-Schleife durch, erstellt das Paket aus den eingeschachtelten Middleware-Funktionen und gibt dieses Paket dann zurück – woraufhin `app.routes()` es umgehend an `main()` weiterreicht:
+
+```go
+func (app *Application) Routes() http.Handler {
+	// [ ... do the routing stuff]
+
+	// build and equip the closure, and then save its reference address in 'mwChain' 
+	// => mwChain is now an executable function of type Middleware!
+	mwChain := createMdwChain(
+		app.recoverPanic,
+		app.logRequest,
+		secureHeaders,
+	)
+	
+	// pass 'mux' to the closure, execute it and return its return value to main()
+	return mwChain(mux)
+}
+```
+
 ## 2024-06-19 16:10
 
 Der Standard-Weg in _Go,_ um mit einer _panic_ umzugehen, ist für ein

@@ -5,6 +5,28 @@ import (
 	"net/http"
 )
 
+// new type representing a middleware function
+type Middleware func(http.Handler) http.Handler
+
+func createMdwChain(xs ...Middleware) Middleware {
+	return func(next http.Handler) http.Handler {
+		// building a 'triangle' of nested middleware functions.
+		// If you can't get your head around this, follow it step by step in
+		// the debugger. No, seriously! You really should understand what's
+		// happening here!
+		//
+		// we are moving bottom-up in the 'xs' list that has been passed to us!
+		for i := len(xs) - 1; i >= 0; i-- {
+			// xs[i] is the current Middleware function in the list
+			x := xs[i]
+			// x(next) is the return value of the current Middleware function.
+			// This is what creates the nested function calls!
+			next = x(next)
+		}
+		return next
+	}
+}
+
 // add security for the browser
 func secureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

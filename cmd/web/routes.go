@@ -22,7 +22,13 @@ func (app *Application) Routes() http.Handler {
 	mux.HandleFunc(`GET /snippets/{id}`, app.handleSingleSnippetView)
 	mux.HandleFunc(`POST /snippets/new`, app.handleNewSnippet)
 
-	return app.recoverPanic(app.logRequest(secureHeaders(mux)))
+	mwChain := createMdwChain(
+		app.recoverPanic,
+		app.logRequest,
+		secureHeaders,
+	)
+
+	return mwChain(mux)
 }
 
 // vim: ts=4 sw=4 fdm=indent
