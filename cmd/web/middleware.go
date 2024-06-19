@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -20,6 +21,21 @@ func secureHeaders(next http.Handler) http.Handler {
 func (app *Application) logRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.InfoLog.Printf("%s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *Application) recoverPanic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// 'defer' guarantees that this func() will always be called,
+		// even after a panic event.
+		defer func() {
+			// is there a panic to recover from? Well, in that case ...
+			if err := recover(); err != nil {
+				w.Header().Set(`Connection`, `close`)
+				app.ServerError(w, fmt.Errorf("%s", err))
+			}
+		}()
 		next.ServeHTTP(w, r)
 	})
 }

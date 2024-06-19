@@ -5,6 +5,39 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-19 16:10
+
+Der Standard-Weg in _Go,_ um mit einer _panic_ umzugehen, ist für ein
+Web-Projekt ziemlich Kacke. Einfach abnippeln und das Frontend mit einer leeren
+Response abspeisen – das kann es nicht sein für eine serviceorientierte App.
+
+Hier die Middleware, die dieses Problem lösen soll:
+
+```go
+// middleware for well-formed death after panic
+func (app *Application) recoverPanic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// 'defer' guarantees that this func() will always be called,
+		// even after a panic event.
+		// -1-
+		defer func() {
+			// is there a panic to recover from? Well, in that case ...
+			// -2-
+			if err := recover(); err != nil {
+				w.Header().Set(`Connection`, `close`)
+				app.ServerError(w, fmt.Errorf("%s", err))
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+}
+```
+
+#### Anmerkungen:
+
+1. `defer` plus ausgeführte Funktion sorgt dafür, dass die Funktion __auf jeden Fall__ ausgeführt wird, auch wenn eine _panic_ ausgeworfen wurde! Hier in diesem Fall ist das eine _anonyme_ Funktion, in der eine _panic_ mit Hilfe von `recover()` abgefangen und in einen geordneten `http.InternalServerError` umgewandelt wird, mit allem, was dazugehört. `defer` verlangt, dass diese Funktion im Code ausgeführt wird; deshalb die beiden `()` direkt hinter der Definition.
+0. Wie gesagt: `recover()` dient dazu, die _panic_ abzufangen und in einen geordneten `http.InternalServerError` umzuwandeln.
+
 ## 2024-06-18 14:39
 
 Hab jetzt auch die nächste Middleware implementiert. War mit dem neuen Snippet ein Klax!
@@ -36,9 +69,9 @@ func (app *Application) Routes() http.Handler {
 #### Anmerkungen
 
 1. Wenn eine allgemeine Middleware zum Einsatz kommt, müssen wir den
-   Rückgabetyp von `app.Routes()` nach `http.Handler` ändern. Vorher war er
-   `*http.ServeMux`; in der Sache ändert das nichts, weil http.Handler ein
-   _Interface_ ist und `*http.ServeMux` dieses Interface implementiert hat.
+   Rückgabetyp von `app.Routes()` von `*http.ServeMux` nach `http.Handler` ändern.; 
+   in der Sache ändert das nichts, weil http.Handler ein _Interface_ ist und 
+   `*http.ServeMux` dieses Interface implementiert hat.
 0. Wie wir in _Obsidian_ schon geklärt haben, besteht das Wesen von Middleware
    darin, den „nächsten Facharbeiter“ als Argument „einzuklammern“. Hier
    klammert `secureHeaders()` das `mux`-Objekt ein, und da es das komplette 

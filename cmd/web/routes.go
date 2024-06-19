@@ -22,7 +22,7 @@ func (app *Application) Routes() http.Handler {
 	mux.HandleFunc(`GET /snippets/{id}`, app.handleSingleSnippetView)
 	mux.HandleFunc(`POST /snippets/new`, app.handleNewSnippet)
 
-	return app.logRequest(secureHeaders(mux))
+	return app.recoverPanic(app.logRequest(secureHeaders(mux)))
 }
 
 // vim: ts=4 sw=4 fdm=indent
