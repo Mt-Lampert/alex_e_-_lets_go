@@ -5,10 +5,16 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-20: 20:30
+
+Habe das Projekt statt auf _httprouter_ auf [Chi](https://go-chi.io/)
+umgestellt. Ohne Alex´ Hilfe, nur mit Hilfe der offiziellen Dokumentation. Hab
+3 Stunden dafür eingeplant, am Ende war alles nach 30 min fertig. Geil!
+
 ## 2024-06-19 18:08
 
 Anstelle des Extra-Pakets, das Alex Edwards vorgeschlagen hat, habe ich hier etwas eigenes
-aufgebaut, das ich mir von [diesem Video]() (Ab 07:43) geklaut habe.
+aufgebaut, das ich mir von [diesem Video](https://www.youtube.com/watch?v=H7tbjKFSg58) (Ab 07:43) geklaut habe.
 
 ```go
 // file: ./cmd/web/middleware.go

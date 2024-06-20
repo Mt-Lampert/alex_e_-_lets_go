@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
+	"github.com/go-chi/chi/v5"
 )
 
 func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +60,7 @@ func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) 
 func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
-	idBE := r.PathValue(`id`)
+	idBE := chi.URLParam(r, `id`)
 	idDB, err := strconv.ParseInt(idBE, 10, 64)
 	if err != nil {
 		app.NotFound(w)
