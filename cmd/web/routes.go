@@ -10,6 +10,7 @@ import (
 func (app *Application) Routes() *chi.Mux {
 	mux := chi.NewRouter()
 
+	// Use the middleware
 	mux.Use(app.recoverPanic)
 	mux.Use(app.logRequest)
 	mux.Use(secureHeaders)
@@ -20,25 +21,16 @@ func (app *Application) Routes() *chi.Mux {
 	// Register the fileServer for all URL paths that start with '/static/'.
 	// For matching paths, we strip the '/static' prefix before the request
 	// reaches the fileServer.
-	// mux.Handle(`/static/`, http.StripPrefix(`/static`, fileServer))
 	mux.Handle("/static/*", http.StripPrefix("/static/", fileServer))
 
-	// mux.HandleFunc(`GET /home`, app.handleHome)
 	mux.Get(`/`, app.handleHome)
 
 	// Endpoints with handlers as app methods
 	mux.Get(`/urlquery`, app.handleUrlQuery)
 
 	mux.Get(`/snippets`, app.handleSnippetList)
-	// TODO: Update app.handleSingleSnippetView()
 	mux.Get(`/snippets/{id}`, app.handleSingleSnippetView)
 	mux.Post(`/snippets/new`, app.handleNewSnippet)
-
-	// mwChain := createMdwChain(
-	// 	app.recoverPanic,
-	// 	app.logRequest,
-	// 	secureHeaders,
-	// )
 
 	return mux
 }
