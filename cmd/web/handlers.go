@@ -35,7 +35,7 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 // Add a handler function for creating a snippet.
 func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	output := "Inserted new Snippet:\n"
+	// output := "Inserted new Snippet:\n"
 	params2Insert := db.InsertSnippetParams{
 		Title:   `So ein Dummy`,
 		Content: `Ich bin ja so ein Dummy!`,
@@ -50,10 +50,13 @@ func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) 
 
 	app.InfoLog.Println("Inserted new entry!")
 
-	output += fmt.Sprintf("    id: %d\n", feedback.ID)
-	output += fmt.Sprintf("    title: '%s'\n\n", feedback.Title)
+	// output += fmt.Sprintf("    id: %d\n", feedback.ID)
+	// output += fmt.Sprintf("    title: '%s'\n\n", feedback.Title)
 
-	fmt.Fprint(w, output)
+	url := fmt.Sprintf("localhost:3000/snippets/%d", feedback.ID)
+
+	// fmt.Fprint(w, output)
+	http.Redirect(w, r, url, http.StatusPermanentRedirect)
 }
 
 // Add a handler function for viewing a specific snippet
