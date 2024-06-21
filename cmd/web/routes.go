@@ -10,6 +10,13 @@ import (
 func (app *Application) Routes() *chi.Mux {
 	mux := chi.NewRouter()
 
+	// assign a custom http.HandlerFunc as the default handler for 404 Not
+	// Found cases.
+	// See :GoDoc for documentation
+	mux.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		app.NotFound(w)
+	})
+
 	// Use the middleware
 	mux.Use(app.recoverPanic)
 	mux.Use(app.logRequest)
