@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"runtime/debug"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
@@ -52,15 +53,15 @@ func (app *Application) ResultRawToTpl(r db.GetSnippetRow) TplSnippet {
 	}
 
 	myExpiresTpl := fmt.Sprintf("%v", r.Ends)
+	contentTpl := strings.ReplaceAll(r.Content, "\\n", "\n")
 
 	return TplSnippet{
 		ID:      id,
 		Title:   r.Title,
-		Content: r.Content,
+		Content: contentTpl,
 		Created: createdTpl,
 		Expires: myExpiresTpl,
 	}
-
 }
 
 // converts a slice of raw DB snippets into snippets for use in templates
