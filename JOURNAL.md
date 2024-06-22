@@ -5,6 +5,23 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-22 19:19
+
+Ich habe heute ganz anders gearbeitet. Im _Tai-Chi_-Modus. Bedeutet: Ich war
+maximal konzentriert, war innerlich maximal entspannt und habe Fehler dadurch
+vermieden, dass ich auf Langsamkeit gesetzt habe. All das, was die Arbeit so
+belastend gemacht hat, war damit verschwunden. Und ich habe dadurch keine Zeit
+verloren. Weil ich keine Zeit für Fehlersuche und Fehlerkorrektur aufbringen
+musste.
+
+Zur Sache: Ich habe ein Formular für die Erstellung eines neuen Snippets
+erstellt. Nur das Formular. War mit den ganzen Vorarbeiten, was das Template
+anging, ein Klacks!
+
+```go
+
+```
+
 ## 2024-06-20: 20:30
 
 Habe das Projekt statt auf _httprouter_ auf [Chi](https://go-chi.io/)

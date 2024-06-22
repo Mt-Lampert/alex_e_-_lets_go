@@ -32,7 +32,13 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 	app.Render(w, http.StatusOK, `home.go.html`, data)
 }
 
-// Add a handler function for creating a snippet.
+// A handler function to show a "Create Snippet" form
+func (app Application) handleNewSnippetForm(w http.ResponseWriter, r *http.Request) {
+	data := app.buildTemplateData()
+	app.Render(w, http.StatusOK, `createSnippet.go.html`, data)
+}
+
+// A handler function for creating a snippet in the database
 func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	// output := "Inserted new Snippet:\n"
