@@ -40,51 +40,33 @@ func (app Application) handleNewSnippetForm(w http.ResponseWriter, r *http.Reque
 
 // A handler function for creating a snippet in the database
 func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(`    I am inside handleNewSnippet()!`)
-	simpleOutput := "Form data I got:\n"
 	// TODO:
-	//   1. Get the form values from the Request
 	//   0. Validate the form values
 	//   0. Check and 'punish' validation errors
-	//   0. define and fill the params2Insert-Object with the values
-	//   0. write the params2Insert object into the database
-	//   0. check for errors
-	//   0. If all OK, redirect to the new snippet's single view
+
+	ctx := context.Background()
 
 	// Get the form values from the request
 	r.ParseForm()
 	title := r.Form.Get("title")
-	simpleOutput += fmt.Sprintf("    title: %s\n", title)
 	content := r.Form.Get("content")
-	simpleOutput += fmt.Sprintf("    content: %s\n", content)
 	expires := r.Form.Get("expires")
-	simpleOutput += fmt.Sprintf("    expires: %s\n", expires)
 
-	fmt.Fprint(w, simpleOutput)
+	params2Insert := db.InsertSnippetParams{
+		Title:   title,
+		Content: content,
+		Expires: sql.NullString{Valid: true, String: expires},
+	}
 
-	// ctx := context.Background()
-	// // output := "Inserted new Snippet:\n"
-	// params2Insert := db.InsertSnippetParams{
-	// 	Title:   `So ein Dummy`,
-	// 	Content: `Ich bin ja so ein Dummy!`,
-	// 	Expires: sql.NullString{Valid: true, String: `30 days`},
-	// }
+	feedback, err := db.Qs.InsertSnippet(ctx, params2Insert)
+	if err != nil {
+		app.ServerError(w, err)
+		return
+	}
 
-	// feedback, err := db.Qs.InsertSnippet(ctx, params2Insert)
-	// if err != nil {
-	// 	app.ServerError(w, err)
-	// 	return
-	// }
-	//
-	// app.InfoLog.Println("Inserted new entry!")
+	url := fmt.Sprintf("/snippets/%d", feedback.ID)
 
-	// output += fmt.Sprintf("    id: %d\n", feedback.ID)
-	// output += fmt.Sprintf("    title: '%s'\n\n", feedback.Title)
-
-	// url := fmt.Sprintf("localhost:3000/snippets/%d", feedback.ID)
-
-	// fmt.Fprint(w, output)
-	// http.Redirect(w, r, url, http.StatusPermanentRedirect)
+	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
 // Add a handler function for viewing a specific snippet
