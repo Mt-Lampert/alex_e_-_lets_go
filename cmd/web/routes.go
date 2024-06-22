@@ -38,6 +38,7 @@ func (app *Application) Routes() *chi.Mux {
 	mux.Get(`/snippets`, app.handleSnippetList)
 	mux.Get(`/snippets/{id}`, app.handleSingleSnippetView)
 	mux.Get(`/new/snippet`, app.handleNewSnippetForm)
+	mux.Post(`/create/snippet`, app.handleNewSnippet)
 
 	return mux
 }
