@@ -19,7 +19,11 @@ erstellt. Nur das Formular. War mit den ganzen Vorarbeiten, was das Template
 anging, ein Klacks!
 
 ```go
-
+// A handler function to show a "Create Snippet" form
+func (app Application) handleNewSnippetForm(w http.ResponseWriter, r *http.Request) {
+	data := app.buildTemplateData()
+	app.Render(w, http.StatusOK, `createSnippet.go.html`, data)
+}
 ```
 
 ## 2024-06-20: 20:30
@@ -55,7 +59,13 @@ func createMdwChain(xs ...Middleware) Middleware {
 }
 ```
 
-Das funktioniert, weil die _Go Runtime_ beim Aufruf von `createMdwChain()` nur den „äußersten Rahmen“, also nur die Closure zurückgibt	– ohne sie auszuführen. Dafür „weiß“ die Closure an dieser Stelle schon ganz genau, woraus sich `xs` zusammensetzt. Erst wenn diese „scharf gemachte Closure“ dann tatsächlich aufgerufen wird, rattert ihre `for`-Schleife durch, erstellt das Paket aus den eingeschachtelten Middleware-Funktionen und gibt dieses Paket dann zurück – woraufhin `app.routes()` es umgehend an `main()` weiterreicht:
+Das funktioniert, weil die _Go Runtime_ beim Aufruf von `createMdwChain()` nur
+den „äußersten Rahmen“, also nur die Closure zurückgibt	– ohne sie auszuführen.
+Dafür „weiß“ die Closure an dieser Stelle schon ganz genau, woraus sich `xs`
+zusammensetzt. Erst wenn diese „scharf gemachte Closure“ dann tatsächlich
+aufgerufen wird, rattert ihre `for`-Schleife durch, erstellt das Paket aus den
+eingeschachtelten Middleware-Funktionen und gibt dieses Paket dann zurück –
+woraufhin `app.routes()` es umgehend an `main()` weiterreicht:
 
 ```go
 func (app *Application) Routes() http.Handler {
@@ -454,7 +464,7 @@ func main() {
 	// same format as our 'ends' column
 	var endTimeEntry interface{} = "2018-12-13 18:43:00"
 	// interface{} -> String 
-	endTimeString := fmt.Sprintf("%v", timestamp)
+	endTimeString := fmt.Sprintf("%v", endTimeEntry)
 	// str -> time conversion
 	endTime, err := time.Parse("2006-01-02 03:04:05", endTimeString)
 
