@@ -6,5 +6,5 @@ def test(c):
 
 @task
 def newSnippet(c):
-    cmd = "http --form --ignore-stdin POST 'localhost:3000/create/snippet' title='Currywurst' content='Gehste inne Stadt\\nWat macht dich da satt?\\n’Ne Currywurst!\\n\\n-- Herbert Grönemeyer' expires='1 month'"
+    cmd = "http --form --ignore-stdin POST 'localhost:3000/create/snippet' title='Currywurst' content='Gehste inne Stadt\nWat macht dich da satt?\n’Ne Currywurst!\n\n-- Herbert Grönemeyer' expires='1 month'"
     c.run(cmd)

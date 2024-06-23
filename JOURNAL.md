@@ -1,9 +1,17 @@
 
 # TODO
 
+- [ ] (Long-term) Die selbstgebackene Validierung auf _Validator_ umstellen. Hier ein [Artikel](https://thedevelopercafe.com/articles/payload-validation-in-go-with-validator-626594a58cf6).
+
 # JOURNAL
 
 <!-- ## 2024-06-XX XX:XX -->
+
+## 2024-06-23 16:41
+
+Hab jetzt eine selbstgebackene Validierung hinbekommen. Einfach durch logisches
+Nachdenken und Lesen in der
+[Validator](https://thedevelopercafe.com/articles/payload-validation-in-go-with-validator-626594a58cf6)-Dokumentation.
 
 ## 2024-06-22 19:19
 

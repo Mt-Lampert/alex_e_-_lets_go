@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
 )
@@ -112,6 +113,24 @@ func (app *Application) Render(
 // factory helper to build a templateData instance
 func (app *Application) buildTemplateData() *templateData {
 	return &templateData{CurrentYear: time.Now().Year()}
+}
+
+// checks if 'title' form value is valid
+func validateTitle(rawTitle string) bool {
+	longEnough := utf8.RuneCountInString(rawTitle) >= 4
+	shortEnough := utf8.RuneCountInString(rawTitle) <= 30
+
+	return longEnough && shortEnough
+}
+
+// checks if 'content' form value is valid
+func validateContent(rawContent string) bool {
+	return utf8.RuneCountInString(rawContent) >= 5
+}
+
+// checks if 'expires' form value is valid
+func validateExpires(rawExpires string) bool {
+	return rawExpires == `1 day` || rawExpires == `1 week` || rawExpires == `1 month` || rawExpires == `1 year`
 }
 
 // vim: ts=4 sw=4 fdm=indent

@@ -40,17 +40,39 @@ func (app Application) handleNewSnippetForm(w http.ResponseWriter, r *http.Reque
 
 // A handler function for creating a snippet in the database
 func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) {
-	// TODO:
-	//   0. Validate the form values
+	// TODO: Validation
+	//   1. implement `func validateTitle(rawTitle string) bool {}`
+	//   0. implement `func validateContent(rawContent string) bool {}`
+	//   0. implement `func validateExpires(rawExpires string) bool {}`
 	//   0. Check and 'punish' validation errors
 
 	ctx := context.Background()
+	fieldErrors := make(map[string]string, 3)
+	myOutput := "There were errors in the entries:\n"
 
 	// Get the form values from the request
 	r.ParseForm()
 	title := r.Form.Get("title")
+
+	if !validateTitle(title) {
+		fieldErrors[`title`] = `Title entry must be between 4 and 30 characters long.`
+		myOutput += fmt.Sprintf("    %s\n", fieldErrors[`title`])
+	}
 	content := r.Form.Get("content")
+	if !validateContent(content) {
+		fieldErrors[`content`] = "Content entry must be at least 5 characters long!"
+		myOutput += fmt.Sprintf("    %s\n", fieldErrors[`content`])
+	}
 	expires := r.Form.Get("expires")
+	if !validateExpires(expires) {
+		fieldErrors[`expires`] = "Expires entry must be one of the choices below!"
+		myOutput += fmt.Sprintf("    %s\n", fieldErrors[`expires`])
+	}
+
+	if len(fieldErrors) > 0 {
+		fmt.Fprint(w, myOutput)
+		return
+	}
 
 	params2Insert := db.InsertSnippetParams{
 		Title:   title,
