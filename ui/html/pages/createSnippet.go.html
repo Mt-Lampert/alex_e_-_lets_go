@@ -4,18 +4,27 @@
 <form action="/create/snippet" method="POST">
 	<div>
 		<label for="title">Title</label>
-		<input type="text" name="title">
+		{{ with .Form.FieldErrors.Title }}
+		<label class="error">{{ . }}</label>
+		{{ end }}
+		<input type="text" name="title" value="{{ .Form.Title }}">
 	</div>
 	<div>
 		<label for="content">Content</label>
-		<textarea name="content" id="content"></textarea>
+		{{ with .Form.FieldErrors.Content }}
+		<label for="content" class="error">{{ . }}</label>
+		{{ end }}
+		<textarea name="content" id="content">{{ .Form.Content }}</textarea>
 	</div>
 	<div>
 		<label for="expires">Delete In:</label>
-		<input type="radio" name="expires" value="1 day"> One Day
-		<input type="radio" name="expires" value="7 days"> One Week
-		<input type="radio" name="expires" value="1 month" checked> One Month
-		<input type="radio" name="expires" value="1 year"> One Year
+		{{ with .Form.FieldErrors.Expires }}
+		<label for="expires" class="error">{{ . }}</label>
+		{{ end }}
+		<input type="radio" name="expires" value="1 day" {{ if (eq .Form.Expires "1 day" ) }}checked{{ end }}> One Day
+		<input type="radio" name="expires" value="1 week" {{ if (eq .Form.Expires "1 week" ) }}checked{{ end }}> One Week
+		<input type="radio" name="expires" value="1 month" {{ if (eq .Form.Expires "1 month" ) }}checked{{ end }}> One Month
+		<input type="radio" name="expires" value="1 year" {{ if (eq .Form.Expires "1 year" ) }}checked{{ end }}> One Year
 	</div>
 	<div>
 		<input type="submit" value="Publish New Snippet">

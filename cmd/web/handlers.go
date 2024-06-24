@@ -12,6 +12,14 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// type for saving and validating form data for use in a snippet Template
+type SnippetCreateForm struct {
+	Title       string
+	Content     string
+	Expires     string
+	FieldErrors map[string]string
+}
+
 func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	rawSnippets, err := db.Qs.GetAllSnippets(ctx)
@@ -27,6 +35,7 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 
 	// create data object
 	data := app.buildTemplateData()
+
 	data.Snippets = tplSnippets
 
 	app.Render(w, http.StatusOK, `home.go.html`, data)
@@ -35,6 +44,10 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 // A handler function to show a "Create Snippet" form
 func (app Application) handleNewSnippetForm(w http.ResponseWriter, r *http.Request) {
 	data := app.buildTemplateData()
+	// will check 'One Month' in the 'Expires' section in the template
+	data.Form = SnippetCreateForm{
+		Expires: `1 month`,
+	}
 	app.Render(w, http.StatusOK, `createSnippet.go.html`, data)
 }
 
@@ -46,49 +59,52 @@ func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) 
 	//   0. implement `func validateExpires(rawExpires string) bool {}`
 	//   0. Check and 'punish' validation errors
 
-	ctx := context.Background()
-	fieldErrors := make(map[string]string, 3)
-	myOutput := "There were errors in the entries:\n"
-
+	// ctx := context.Background()
 	// Get the form values from the request
 	r.ParseForm()
-	title := r.Form.Get("title")
-
-	if !validateTitle(title) {
-		fieldErrors[`title`] = `Title entry must be between 4 and 30 characters long.`
-		myOutput += fmt.Sprintf("    %s\n", fieldErrors[`title`])
-	}
-	content := r.Form.Get("content")
-	if !validateContent(content) {
-		fieldErrors[`content`] = "Content entry must be at least 5 characters long!"
-		myOutput += fmt.Sprintf("    %s\n", fieldErrors[`content`])
-	}
-	expires := r.Form.Get("expires")
-	if !validateExpires(expires) {
-		fieldErrors[`expires`] = "Expires entry must be one of the choices below!"
-		myOutput += fmt.Sprintf("    %s\n", fieldErrors[`expires`])
+	form := SnippetCreateForm{
+		Title:       r.Form.Get("title"),
+		Content:     r.Form.Get("content"),
+		Expires:     r.Form.Get(`expires`),
+		FieldErrors: make(map[string]string, 3),
 	}
 
-	if len(fieldErrors) > 0 {
-		fmt.Fprint(w, myOutput)
+	//
+	// Validate each and every form field
+	//
+	if !validateTitle(form.Title) {
+		form.FieldErrors[`Title`] = `Title entry must be between 4 and 30 characters long.`
+	}
+	if !validateContent(form.Content) {
+		form.FieldErrors[`Content`] = "Content entry must be at least 5 characters long!"
+	}
+
+	if !validateExpires(form.Expires) {
+		form.FieldErrors[`Expires`] = "Expires entry must be one of the choices below!"
+	}
+	// evaluate the errors
+	if len(form.FieldErrors) > 0 {
+		data := app.buildTemplateData()
+		data.Form = form
+		app.Render(w, http.StatusUnprocessableEntity, `createSnippet.go.html`, data)
 		return
 	}
-
-	params2Insert := db.InsertSnippetParams{
-		Title:   title,
-		Content: content,
-		Expires: sql.NullString{Valid: true, String: expires},
-	}
-
-	feedback, err := db.Qs.InsertSnippet(ctx, params2Insert)
-	if err != nil {
-		app.ServerError(w, err)
-		return
-	}
-
-	url := fmt.Sprintf("/snippets/%d", feedback.ID)
-
-	http.Redirect(w, r, url, http.StatusSeeOther)
+	//
+	// params2Insert := db.InsertSnippetParams{
+	// 	Title:   form.Title,
+	// 	Content: form.Content,
+	// 	Expires: sql.NullString{Valid: true, String: form.Expires},
+	// }
+	//
+	// feedback, err := db.Qs.InsertSnippet(ctx, params2Insert)
+	// if err != nil {
+	// 	app.ServerError(w, err)
+	// 	return
+	// }
+	//
+	// url := fmt.Sprintf("/snippets/%d", feedback.ID)
+	//
+	// http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
 // Add a handler function for viewing a specific snippet
