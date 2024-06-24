@@ -10,6 +10,7 @@ type templateData struct {
 	CurrentYear int
 	Snippet     TplSnippet
 	Snippets    []TplSnippet
+	Form        any
 }
 
 func buildTemplateCache() (map[string]*template.Template, error) {
