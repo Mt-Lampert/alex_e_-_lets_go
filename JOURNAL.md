@@ -7,6 +7,37 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-25 07:35
+
+### Ein eigener Validator
+
+In diesem Commit backen wir uns einen eigenen Validator – vorwiegend zu
+Lernzwecken, damit wir verstehen, wie so ein Pakete funktioniert. Den so wie
+unser kleiner Validator funktioniert auch das
+[Validator](https://thedevelopercafe.com/articles/payload-validation-in-go-with-validator-626594a58cf6)-Paket.
+
+Zeichnen wir doch mal nach, wie es aufgebaut ist:
+
+1. Im Zentrum steht der _Carrier_, `validator`. An ihm hängen alle Methoden,
+   die für das `validator`-Paket wichtig sind.
+2. Die `CheckField()`-Methode überprüft, ob ein Formulareintrag oder ein
+   JSON-Eintrag gültig ist. Falls nicht, wird in `validator.FieldErrors` ein
+   neuer Eintrag verbucht. Das folgende Beispiel erstellt einen Validator (`val`),
+   überprüft `title` und verbucht den neuen Eintrag `val.FieldErrors['title']` mit
+   `must be between 4 and 20 characters long`, falls der Test in
+   `val.WithinRange()` durchfällt [Ausrufezeichen!].
+
+```go
+val = &validator.validator
+title := "Currywurst"
+key := `title`
+msg := `must be between 4 and 20 characters long`,
+
+val.CheckField(!val.WithinRange(4, 20, title), key, msg)
+```
+
+
+
 ## 2024-06-23 16:41
 
 Hab jetzt eine selbstgebackene Validierung hinbekommen. Einfach durch logisches
