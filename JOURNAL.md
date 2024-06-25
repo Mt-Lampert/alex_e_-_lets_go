@@ -7,9 +7,13 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+<!-- ## 2024-06-XX XX:XX -->
+
 ## 2024-06-25 10:35
 
-Das mit dem Validator hat jetzt auch in der Umsetzung geklappt. Siehe die Änderungen in `app.handleNewSnippet`. Allerdings gibt es da noch eine Sache, die neu für uns ist:
+Das mit dem Validator hat jetzt auch in der Umsetzung geklappt. Siehe die
+Änderungen in `app.handleNewSnippet`. Allerdings gibt es da noch eine Sache,
+die neu für uns ist:
 
 ```go
 type SnippetCreateForm struct {
@@ -70,10 +74,10 @@ Zeichnen wir doch mal nach, wie es aufgebaut ist:
 ```go
 val = &validator.validator
 title := "Currywurst"
-key := `title`
+key := `Title`
 msg := `must be between 4 and 20 characters long`,
 
-val.CheckField(!val.WithinRange(4, 20, title), key, msg)
+val.CheckField(val.WithinRange(4, 20, title), key, msg)
 ```
 
 3. Alle anderen öffentlichen Methoden dienen der Wert-Überprüfung wie oben
