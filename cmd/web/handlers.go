@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+
 	"database/sql"
 	"errors"
 	"fmt"
@@ -9,15 +10,16 @@ import (
 	"strconv"
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
+	"github.com/MtLampert/alex_e_-_lets_go/internal/validator"
 	"github.com/go-chi/chi/v5"
 )
 
 // type for saving and validating form data for use in a snippet Template
 type SnippetCreateForm struct {
-	Title       string
-	Content     string
-	Expires     string
-	FieldErrors map[string]string
+	Title   string
+	Content string
+	Expires string
+	validator.Validator
 }
 
 func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
@@ -53,37 +55,42 @@ func (app Application) handleNewSnippetForm(w http.ResponseWriter, r *http.Reque
 
 // A handler function for creating a snippet in the database
 func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) {
-	// TODO: Validation
-	//   1. implement `func validateTitle(rawTitle string) bool {}`
-	//   0. implement `func validateContent(rawContent string) bool {}`
-	//   0. implement `func validateExpires(rawExpires string) bool {}`
-	//   0. Check and 'punish' validation errors
 
 	// ctx := context.Background()
 	// Get the form values from the request
 	r.ParseForm()
 	form := SnippetCreateForm{
-		Title:       r.Form.Get("title"),
-		Content:     r.Form.Get("content"),
-		Expires:     r.Form.Get(`expires`),
-		FieldErrors: make(map[string]string, 3),
+		Title:   r.Form.Get("title"),
+		Content: r.Form.Get("content"),
+		Expires: r.Form.Get(`expires`),
 	}
 
 	//
 	// Validate each and every form field
 	//
-	if !validateTitle(form.Title) {
-		form.FieldErrors[`Title`] = `Title entry must be between 4 and 30 characters long.`
-	}
-	if !validateContent(form.Content) {
-		form.FieldErrors[`Content`] = "Content entry must be at least 5 characters long!"
-	}
+	form.CheckField(
+		form.WithinRange(4, 20, form.Title),
+		`Title`,
+		`Title entry must be between 4 and 30 characters long.`,
+	)
+	form.CheckField(
+		form.LongEnough(5, form.Content),
+		`Content`,
+		"Content entry must be at least 5 characters long!",
+	)
+	form.CheckField(
+		form.ValidExpiration(form.Expires),
+		`Expires`,
+		"Expires entry must be one of the choices below!",
+	)
 
-	if !validateExpires(form.Expires) {
-		form.FieldErrors[`Expires`] = "Expires entry must be one of the choices below!"
-	}
+	// for key, val := range form.FieldErrors {
+	// 	fmt.Printf("   '%s': '%s'\n", key, val)
+	// }
+
 	// evaluate the errors
-	if len(form.FieldErrors) > 0 {
+	if !form.Valid() {
+		// fmt.Println("There are form errors here!")
 		data := app.buildTemplateData()
 		data.Form = form
 		app.Render(w, http.StatusUnprocessableEntity, `createSnippet.go.html`, data)

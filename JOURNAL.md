@@ -7,12 +7,52 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-25 10:35
+
+Das mit dem Validator hat jetzt auch in der Umsetzung geklappt. Siehe die Änderungen in `app.handleNewSnippet`. Allerdings gibt es da noch eine Sache, die neu für uns ist:
+
+```go
+type SnippetCreateForm struct {
+	Title   string
+	Content string
+	Expires string
+	validator.Validator
+}
+```
+
+In der letzten Zeile wird einfach der Typ `validator.Validator` eingefügt,
+__ohne__ ihm einen Schlüssel wie `Expires` zuzuweisen. Was bedeutet das? Es
+bedeutet, dass eine Variable vom Typ `SnippetCreateForm` _auf alle Methoden und
+alle Attribute von_ `validator.Validator` _zugreifen kann, als wären sie eigens
+für_ `SnippetCreateForm` _geschrieben!_ Deshalb funktioniert Code wie hier:
+
+```go
+form := SnippetCreateForm{ /* ... */ }
+
+form.CheckField(
+	form.WithinRange(4, 20, form.Title),
+	`Title`,
+	`Title entry must be between 4 and 30 characters long.`,
+)
+
+// [...]
+
+if !form.Valid() {
+	data := app.buildTemplateData()
+	data.Form = form
+	// => in the template it's still going to be `.Form.FieldErrors.Title`
+	app.Render(w, http.StatusUnprocessableEntity, `createSnippet.go.html`, data)
+	return
+}
+
+```
+
 ## 2024-06-25 07:35
 
 ### Ein eigener Validator
 
 In diesem Commit backen wir uns einen eigenen Validator – vorwiegend zu
-Lernzwecken, damit wir verstehen, wie so ein Pakete funktioniert. Den so wie
+Lernzwecken, damit wir verstehen, wie so ein Pakete funktioniert. Denn so wie
 unser kleiner Validator funktioniert auch das
 [Validator](https://thedevelopercafe.com/articles/payload-validation-in-go-with-validator-626594a58cf6)-Paket.
 
@@ -35,6 +75,9 @@ msg := `must be between 4 and 20 characters long`,
 
 val.CheckField(!val.WithinRange(4, 20, title), key, msg)
 ```
+
+3. Alle anderen öffentlichen Methoden dienen der Wert-Überprüfung wie oben
+   beschrieben.
 
 
 
