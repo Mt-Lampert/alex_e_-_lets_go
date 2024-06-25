@@ -55,6 +55,14 @@ func (app Application) handleNewSnippetForm(w http.ResponseWriter, r *http.Reque
 
 // A handler function for creating a snippet in the database
 func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) {
+	// simple declaration; serves as target for app.formDecoder.Decode()
+	var form SnippetCreateForm
+
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.ClientError(w, http.StatusBadRequest)
+		return
+	}
 
 	// ctx := context.Background()
 	// Get the form values from the request
@@ -64,14 +72,12 @@ func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// simple declaration; serves as target for app.formDecoder.Decode()
-	var form SnippetCreateForm
-	err := app.formDecoder.Decode(&form, r.PostForm)
-	if err != nil {
-		fmt.Println(`    -> Decode Error`)
-		app.ClientError(w, http.StatusBadRequest)
-		return
-	}
+	// err := app.formDecoder.Decode(&form, r.PostForm)
+	// if err != nil {
+	// 	fmt.Println(`    -> Decode Error`)
+	// 	app.ClientError(w, http.StatusBadRequest)
+	// 	return
+	// }
 
 	//
 	// Validate each and every form field

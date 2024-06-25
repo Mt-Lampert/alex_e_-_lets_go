@@ -7,7 +7,14 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
-<!-- ## 2024-06-XX XX:XX -->
+## 2024-06-25 16:28
+
+Wir müssen uns mit einem Spezialfall von Error abgeben: Dass das Zielobjekt für
+den Formular-Parser keine gültige Referenz auf ein gültiges Objekt ist; in
+diesem Fall hätten wir richtig Scheiße gebaut! Zu diesem Zwecke und Behufe
+haben wir `app.decodePostForm()` als Helfer geschrieben; falls dieser Fall
+eintritt, gibt es eine _Panic,_ andernfalls einen normalen `error` und im
+besten Fall ein `nil` als `error`.
 
 ## 2024-06-25 15:45
 

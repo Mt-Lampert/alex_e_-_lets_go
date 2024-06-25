@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -10,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
+	"github.com/go-playground/form/v4"
 )
 
 type TplSnippet struct {
@@ -131,6 +133,28 @@ func validateContent(rawContent string) bool {
 // checks if 'expires' form value is valid
 func validateExpires(rawExpires string) bool {
 	return rawExpires == `1 day` || rawExpires == `1 week` || rawExpires == `1 month` || rawExpires == `1 year`
+}
+
+// catches a `form.invalidDecoderError` that is thrown when an invalid 'dest'
+// pointer is passed into formDecoder.Decode() as destination object. Throws
+// a panic in this case; otherwise returns any other error or even nil.
+func (app *Application) decodePostForm(r *http.Request, dest any) error {
+	err := r.ParseForm()
+	if err != nil {
+		return err
+	}
+
+	err = app.formDecoder.Decode(dest, r.PostForm)
+	if err != nil {
+		var invalidDecoderError *form.InvalidDecoderError
+		// if error happens to be an invalidDecoderError (at the end of the day)
+		if errors.As(err, &invalidDecoderError) {
+			panic(invalidDecoderError)
+		}
+		// implicit else
+		return err
+	}
+	return nil
 }
 
 // vim: ts=4 sw=4 fdm=indent
