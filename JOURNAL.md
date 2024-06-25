@@ -9,6 +9,27 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-25 15:45
+
+Das nächste Schmankerl – ein automatischer Formular-Parser! Dafür haben wir
+`github.com/go-playground/form/v4@v4` installiert. Das hilft uns,
+Formulareinträge nicht mehr mühsam „von Hand“ einlesen zu müssen, sondern
+einfach mit Hilfe von _struct tags_ arbeiten zu können, so wie wir das aus der
+Arbeit mit JSON kennen:
+
+```go
+type SnippetCreateForm struct {
+	Title               string `form:"title"`
+	Content             string `form:"content"`
+	Expires             string `form:"expires"`
+	validator.Validator `form:"-"`
+}
+```
+
+Die letzte Zeile mit `form:"-"` sagt dem `form`-Decoder, dass er
+`validator.Validator` nicht in seine Arbeit mit einbeziehen soll.
+
+
 ## 2024-06-25 10:35
 
 Das mit dem Validator hat jetzt auch in der Umsetzung geklappt. Siehe die

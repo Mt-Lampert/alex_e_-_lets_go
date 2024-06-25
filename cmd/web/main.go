@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
+	"github.com/go-playground/form/v4"
 )
 
 // See Journal, 2024-06-04 19:09 for documentation
@@ -16,6 +17,7 @@ type Application struct {
 	ErrLog        *log.Logger
 	InfoLog       *log.Logger
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -36,12 +38,16 @@ func main() {
 		errLog.Fatal(err)
 	}
 
+	// Initialize a new form decoder
+	formDecoder := form.NewDecoder()
+
 	// introduce the app Object in order to grant access to the global
 	// application state.
 	app := &Application{
 		ErrLog:        errLog,
 		InfoLog:       infoLog,
 		templateCache: templateCache,
+		formDecoder:   formDecoder,
 	}
 
 	// create new servemux (router) where all Routing is initialized.

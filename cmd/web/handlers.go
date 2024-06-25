@@ -16,10 +16,10 @@ import (
 
 // type for saving and validating form data for use in a snippet Template
 type SnippetCreateForm struct {
-	Title   string
-	Content string
-	Expires string
-	validator.Validator
+	Title               string `form:"title"`
+	Content             string `form:"content"`
+	Expires             string `form:"expires"`
+	validator.Validator `form:"-"`
 }
 
 func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
@@ -58,11 +58,19 @@ func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) 
 
 	// ctx := context.Background()
 	// Get the form values from the request
-	r.ParseForm()
-	form := SnippetCreateForm{
-		Title:   r.Form.Get("title"),
-		Content: r.Form.Get("content"),
-		Expires: r.Form.Get(`expires`),
+	if err := r.ParseForm(); err != nil {
+		fmt.Println(`    -> ParseFormError`)
+		app.ClientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// simple declaration; serves as target for app.formDecoder.Decode()
+	var form SnippetCreateForm
+	err := app.formDecoder.Decode(&form, r.PostForm)
+	if err != nil {
+		fmt.Println(`    -> Decode Error`)
+		app.ClientError(w, http.StatusBadRequest)
+		return
 	}
 
 	//
