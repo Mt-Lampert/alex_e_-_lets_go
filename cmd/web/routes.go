@@ -17,28 +17,32 @@ func (app *Application) Routes() *chi.Mux {
 		app.NotFound(w)
 	})
 
-	// Use the middleware
+	// Use the general middleware
 	mux.Use(app.recoverPanic)
 	mux.Use(app.logRequest)
 	mux.Use(secureHeaders)
 
 	// see Journal: 2024-06-04 for documentation
-	fileServer := http.FileServer(http.Dir(`./ui/static`))
 
 	// Register the fileServer for all URL paths that start with '/static/'.
 	// For matching paths, we strip the '/static' prefix before the request
 	// reaches the fileServer.
+	fileServer := http.FileServer(http.Dir(`./ui/static`))
 	mux.Handle("/static/*", http.StripPrefix("/static/", fileServer))
 
-	mux.Get(`/`, app.handleHome)
+	// define a new subgroup with its own sub-router 'r'
+	// and its own middleware
+	mux.Group(func(r chi.Router) {
+		r.Use(app.sessionManager.LoadAndSave)
 
-	// Endpoints with handlers as app methods
-	mux.Get(`/urlquery`, app.handleUrlQuery)
-
-	mux.Get(`/snippets`, app.handleSnippetList)
-	mux.Get(`/snippets/{id}`, app.handleSingleSnippetView)
-	mux.Get(`/new/snippet`, app.handleNewSnippetForm)
-	mux.Post(`/create/snippet`, app.handleNewSnippet)
+		// Endpoints with handlers as app methods
+		r.Get(`/`, app.handleHome)
+		r.Get(`/urlquery`, app.handleUrlQuery)
+		r.Get(`/snippets`, app.handleSnippetList)
+		r.Get(`/snippets/{id}`, app.handleSingleSnippetView)
+		r.Get(`/new/snippet`, app.handleNewSnippetForm)
+		r.Post(`/create/snippet`, app.handleNewSnippet)
+	})
 
 	return mux
 }

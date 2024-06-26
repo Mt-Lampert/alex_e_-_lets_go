@@ -9,6 +9,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var Dbt *sql.DB
 var Qs *Queries
 
 func Setup() {
@@ -16,7 +17,7 @@ func Setup() {
 		log.Fatalf("Could not load '.env' config file -- %s", err)
 	}
 
-	dbt, err := sql.Open(
+	Dbt, err := sql.Open(
 		os.Getenv("DB_ENGINE"),
 		os.Getenv("DATABASE"))
 
@@ -24,11 +25,11 @@ func Setup() {
 		log.Fatalf("Could not build database tool -- %s", err)
 	}
 
-	err = dbt.Ping()
+	err = Dbt.Ping()
 
 	if err != nil {
 		log.Fatalf("Could not connect to database -- %s", err)
 	}
 
-	Qs = New(dbt)
+	Qs = New(Dbt)
 }

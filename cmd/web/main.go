@@ -6,23 +6,32 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
+	"github.com/alexedwards/scs/sqlite3store"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 )
 
 // See Journal, 2024-06-04 19:09 for documentation
 // Adding a template cache struct
 type Application struct {
-	ErrLog        *log.Logger
-	InfoLog       *log.Logger
-	templateCache map[string]*template.Template
-	formDecoder   *form.Decoder
+	ErrLog         *log.Logger
+	InfoLog        *log.Logger
+	templateCache  map[string]*template.Template
+	formDecoder    *form.Decoder
+	sessionManager *scs.SessionManager
 }
 
 func main() {
 	// initializing the database module
 	db.Setup()
+
+	// initializing the scs session manager
+	sessionManager := scs.New()
+	sessionManager.Store = sqlite3store.New(db.Dbt)
+	sessionManager.Lifetime = time.Hour * 12
 
 	// See Journal, 2024-06-04 08:05 for documentation
 	port := flag.String(`port`, `:3000`, "setting the port number")
@@ -44,10 +53,11 @@ func main() {
 	// introduce the app Object in order to grant access to the global
 	// application state.
 	app := &Application{
-		ErrLog:        errLog,
-		InfoLog:       infoLog,
-		templateCache: templateCache,
-		formDecoder:   formDecoder,
+		ErrLog:         errLog,
+		InfoLog:        infoLog,
+		templateCache:  templateCache,
+		formDecoder:    formDecoder,
+		sessionManager: sessionManager,
 	}
 
 	// create new servemux (router) where all Routing is initialized.

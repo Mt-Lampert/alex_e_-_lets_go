@@ -7,6 +7,48 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-26 16:06
+
+Ich habe jetzt das _SCS_-Paket von Alex Edwards für Session-Management
+heruntergeladen und eingebaut. Zwei Dinge sind dabei besonders interessant:
+
+#### Die Einbindung in das _Chi_-Framework
+
+Die erfolgt mit Hilfe einer
+[Group](https://go-chi.io/#/pages/routing?id=routing-groups). Im Code sieht das
+so aus:
+
+```go
+// file: ./cmd/web/routes.go
+func (app *Application) Routes() *chi.Mux {
+	// ...
+	
+	// define a new subgroup with its own sub-router 'r'
+	mux.Group(func(r chi.Router) {
+		// middleware for this group
+		r.Use(app.sessionManager.LoadAndSave)
+
+		// routes
+		r.Get(`/`, app.handleHome)
+		// Endpoints with handlers as app methods
+		r.Get(`/urlquery`, app.handleUrlQuery)
+		r.Get(`/snippets`, app.handleSnippetList)
+		r.Get(`/snippets/{id}`, app.handleSingleSnippetView)
+		r.Get(`/new/snippet`, app.handleNewSnippetForm)
+		r.Post(`/create/snippet`, app.handleNewSnippet)
+	})
+
+	// ...
+}
+```
+
+_Chi_ erstellt hier hinter den Kulissen einen Sub-Router mit eigenen Routen und
+einer eigenen Middleware für diese Routen (zusätzlich zu den allgemeinen
+Middlewares), und bindet diesen Sub-Router hinterher in `mux` ein. Im Code ist
+dieser Sub-Router als `r chi.Router` zu sehen; deshalb müssen auch alle
+betroffenen Routen und die Middleware mit `r.` eingeleitet werden, sonst gibt
+es eine _Panic!_
+
 ## 2024-06-25 16:28
 
 Wir müssen uns mit einem Spezialfall von Error abgeben: Dass das Zielobjekt für
