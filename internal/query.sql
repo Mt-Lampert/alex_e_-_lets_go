@@ -5,9 +5,8 @@ FROM snippets
 WHERE created <= ends AND id=?;
 
 -- name: GetAllSnippets :many
-SELECT id, title, content, created, datetime(created, expires) as ends 
+SELECT id, title, content, created, expires
 FROM snippets
-WHERE created <= ends
 ORDER BY id DESC
 LIMIT 10;
 

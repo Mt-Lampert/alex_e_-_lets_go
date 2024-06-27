@@ -3,7 +3,7 @@ CREATE TABLE snippets (
 	title VARCHAR(100) NOT NULL,
 	content TEXT NOT NULL,
 	created DATETIME DEFAULT current_timestamp,
-	expires VARCHAR(10) DEFAULT '7 days'
+	expires VARCHAR(10) DEFAULT '1 month'
 );
 
 -- Add an index for the 'created' column

@@ -68,25 +68,30 @@ func (app *Application) ResultRawToTpl(r db.GetSnippetRow) TplSnippet {
 }
 
 // converts a slice of raw DB snippets into snippets for use in templates
-func (app *Application) RawSnippetsToTpl(rs []db.GetAllSnippetsRow) []TplSnippet {
+func (app *Application) RawSnippetsToTpl(rs []db.Snippet) []TplSnippet {
+	fmt.Printf("    RawSnippetsToTpl: length of []rs: %d\n", len(rs))
 	var createdTpl string
-	lenRS := cap(rs)
-	var tsp = make([]TplSnippet, lenRS)
+	// lenRS := len(rs)
+	var tsp = make([]TplSnippet, 0)
 
-	for i, r := range rs {
+	for _, r := range rs {
 		id := strconv.Itoa(int(r.ID))
 		if r.Created.Valid {
+			if snippetExpired(r.Created.Time, r.Expires.String) {
+				continue
+			}
 			createdTpl = r.Created.Time.Format("2006-01-02 03:04:05")
-		}
-		myExpiresTpl := fmt.Sprintf("%v", r.Ends)
-		tsp[i] = TplSnippet{
-			ID:      id,
-			Title:   r.Title,
-			Content: r.Content,
-			Created: createdTpl,
-			Expires: myExpiresTpl,
+			// myExpiresTpl := fmt.Sprintf("%v", r.Ends)
+			tsp = append(tsp, TplSnippet{
+				ID:      id,
+				Title:   r.Title,
+				Content: r.Content,
+				Created: createdTpl,
+				Expires: r.Expires.String,
+			})
 		}
 	}
+	fmt.Printf("    RawSnippetsToTpl: length of []tsp: %d\n", len(tsp))
 	return tsp
 }
 
@@ -155,6 +160,19 @@ func (app *Application) decodePostForm(r *http.Request, dest any) error {
 		return err
 	}
 	return nil
+}
+
+// evaluates if a snippet is expired or not
+func snippetExpired(created time.Time, expires string) bool {
+	now := time.Now()
+	timeoutMap := map[string]int{
+		`1 day`:   1,
+		`7 days`:  7,
+		`1 month`: 30,
+		`1 year`:  365,
+	}
+
+	return created.AddDate(0, 0, timeoutMap[expires]).Before(now)
 }
 
 // vim: ts=4 sw=4 fdm=indent

@@ -22,7 +22,7 @@
 		<label for="expires" class="error">{{ . }}</label>
 		{{ end }}
 		<input type="radio" name="expires" value="1 day" {{ if (eq .Form.Expires "1 day" ) }}checked{{ end }}> One Day
-		<input type="radio" name="expires" value="1 week" {{ if (eq .Form.Expires "1 week" ) }}checked{{ end }}> One Week
+		<input type="radio" name="expires" value="7 days" {{ if (eq .Form.Expires "7 days" ) }}checked{{ end }}> One Week
 		<input type="radio" name="expires" value="1 month" {{ if (eq .Form.Expires "1 month" ) }}checked{{ end }}> One Month
 		<input type="radio" name="expires" value="1 year" {{ if (eq .Form.Expires "1 year" ) }}checked{{ end }}> One Year
 	</div>

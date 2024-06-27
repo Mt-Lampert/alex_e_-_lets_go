@@ -55,7 +55,7 @@ func (v *Validator) ShortEnough(max int, entry string) bool {
 func (v *Validator) ValidExpiration(value string) bool {
 	permittedValues := []string{
 		`1 day`,
-		`1 week`,
+		`7 days`,
 		`1 month`,
 		`1 year`,
 	}

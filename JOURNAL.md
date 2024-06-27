@@ -7,6 +7,54 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-27: 21:58
+
+Lobend erwähnen sollte man auch, dass ich die Ablaufzeit von Snippets nicht
+mehr in der Datenbank berechnen lasse, sondern in _Go._ Ab jetzt wird das Feld
+`ends` in der Datenbank nicht mehr berechnet, sondern einfach der Wert von
+`expires` zurückgegeben und dann in der Hilfsfunktion `snippetExpired()`
+darüber entschieden, ob ein Snippet abgelaufen ist oder nicht.
+
+```go
+return created.AddDate(0, 0, timeoutMap[expires]).Before(now)
+```
+Dieser Code erledigt alles
+
+## 2024-06-27 21:45
+
+Ich musste heute einen Fehler im `handleHome()`-Handler beheben: Bei der
+Anzeige der Snippets kam es zu „blinden“ Leerzeilen in der Tabelle. Das war
+richtig Kacke.
+
+Was war das Problem? Diese Zeile in `app.RawSnippetsToTpl()`:
+
+```go
+lenRS := cap(rs)
+lenRS = len(rs)
+var tsp = make([]TplSnippet, lenRS)
+```
+
+Damit wurden 5 (aktuelle Anzahl der Snippet-Einträge in der Datenbank) oder gar
+8 (Kapazität des []rs-Slices) Plätze für `tsp` reserviert – obwohl am Ende nur
+2 gebraucht wurden, nämlich die zwei, die gegenwärtig nicht abgelaufen waren.
+
+Dieser Code hier macht es jetzt richtig:
+
+```go
+var tsp = make([]TplSnippet, 0)
+
+for _, r in range rs {
+	// -> KEIN Leereintrag!
+	if r.created.Valid {
+		// ...
+		tsp = append(tsp, TplSnippet{ /* ... */ }
+	}
+}
+```
+
+So bleiben die übrig, die tatsächlich angezeigt werden sollen.
+
+
 ## 2024-06-26 16:06
 
 Ich habe jetzt das _SCS_-Paket von Alex Edwards für Session-Management

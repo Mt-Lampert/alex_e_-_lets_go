@@ -34,6 +34,7 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tplSnippets := app.RawSnippetsToTpl(rawSnippets)
+	fmt.Printf("    I found %d snippets:", len(tplSnippets))
 
 	// create data object
 	data := app.buildTemplateData()
@@ -55,6 +56,7 @@ func (app Application) handleNewSnippetForm(w http.ResponseWriter, r *http.Reque
 
 // A handler function for creating a snippet in the database
 func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
 	// simple declaration; serves as target for app.formDecoder.Decode()
 	var form SnippetCreateForm
 
@@ -64,20 +66,12 @@ func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// ctx := context.Background()
-	// Get the form values from the request
-	if err := r.ParseForm(); err != nil {
-		fmt.Println(`    -> ParseFormError`)
+	err = app.formDecoder.Decode(&form, r.PostForm)
+	if err != nil {
+		fmt.Println(`    -> Decode Error`)
 		app.ClientError(w, http.StatusBadRequest)
 		return
 	}
-
-	// err := app.formDecoder.Decode(&form, r.PostForm)
-	// if err != nil {
-	// 	fmt.Println(`    -> Decode Error`)
-	// 	app.ClientError(w, http.StatusBadRequest)
-	// 	return
-	// }
 
 	//
 	// Validate each and every form field
@@ -111,21 +105,21 @@ func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	//
-	// params2Insert := db.InsertSnippetParams{
-	// 	Title:   form.Title,
-	// 	Content: form.Content,
-	// 	Expires: sql.NullString{Valid: true, String: form.Expires},
-	// }
-	//
-	// feedback, err := db.Qs.InsertSnippet(ctx, params2Insert)
-	// if err != nil {
-	// 	app.ServerError(w, err)
-	// 	return
-	// }
-	//
-	// url := fmt.Sprintf("/snippets/%d", feedback.ID)
-	//
-	// http.Redirect(w, r, url, http.StatusSeeOther)
+	params2Insert := db.InsertSnippetParams{
+		Title:   form.Title,
+		Content: form.Content,
+		Expires: sql.NullString{Valid: true, String: form.Expires},
+	}
+
+	feedback, err := db.Qs.InsertSnippet(ctx, params2Insert)
+	if err != nil {
+		app.ServerError(w, err)
+		return
+	}
+
+	url := fmt.Sprintf("/snippets/%d", feedback.ID)
+
+	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
 // Add a handler function for viewing a specific snippet
@@ -142,6 +136,7 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 	resultRaw, err := db.Qs.GetSnippet(ctx, idDB)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			fmt.Println("   Eh? Nothing Found?")
 			app.NotFound(w)
 		} else {
 			app.ServerError(w, err)
