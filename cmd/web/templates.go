@@ -8,9 +8,10 @@ import (
 // a convenient wrapper for template data (usually from the DB)
 type templateData struct {
 	CurrentYear int
+	Flash       string
+	Form        any
 	Snippet     TplSnippet
 	Snippets    []TplSnippet
-	Form        any
 }
 
 func buildTemplateCache() (map[string]*template.Template, error) {

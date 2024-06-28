@@ -6,3 +6,4 @@ tmp/
 internal/db/db.go
 internal/db/models.go
 internal/db/query.sql.go
+sessions.db

@@ -28,9 +28,12 @@ func main() {
 	// initializing the database module
 	db.Setup()
 
+	// get database connection for session management
+	sessDB := sessionDB()
+
 	// initializing the scs session manager
 	sessionManager := scs.New()
-	sessionManager.Store = sqlite3store.New(db.Dbt)
+	sessionManager.Store = sqlite3store.New(sessDB)
 	sessionManager.Lifetime = time.Hour * 12
 
 	// See Journal, 2024-06-04 08:05 for documentation

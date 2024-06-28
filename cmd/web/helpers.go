@@ -1,8 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"runtime/debug"
 	"strconv"
@@ -170,6 +172,15 @@ func snippetExpired(created time.Time, expires string) bool {
 	}
 
 	return created.AddDate(0, 0, timeoutMap[expires]).Before(now)
+}
+
+// provides a database connection for session management
+func sessionDB() *sql.DB {
+	sDB, err := sql.Open(`sqlite3`, `sessions.db`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return sDB
 }
 
 // vim: ts=4 sw=4 fdm=indent

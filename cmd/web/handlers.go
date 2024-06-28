@@ -116,6 +116,9 @@ func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// add flash message to the session
+	app.sessionManager.Put(r.Context(), `flash`, `New snippet successfully created!`)
+
 	url := fmt.Sprintf("/snippets/%d", feedback.ID)
 
 	http.Redirect(w, r, url, http.StatusSeeOther)
@@ -144,9 +147,13 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 	}
 	resultTpl := app.ResultRawToTpl(resultRaw)
 
+	// get the flash message (and delete it from the session), if there is one
+	flash := app.sessionManager.PopString(r.Context(), `flash`)
+
 	// create data object
 	data := app.buildTemplateData()
 	data.Snippet = resultTpl
+	data.Flash = flash
 
 	app.Render(w, http.StatusOK, `view.go.html`, data)
 }

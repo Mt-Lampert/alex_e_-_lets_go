@@ -7,6 +7,16 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-28 10:48
+
+Habe einen SigSegFault-Error-Marathon hinter mir und dabei eine sehr, sehr wichtige Lektion gelernt:
+
+> [!abstract] 
+> Für SQLc und für Session Management brauchen wir zwei verschiedene
+> SQLite3-Datenbanken (nein nicht nur unterschiedliche Tabellen!)
+
+
+
 ## 2024-06-27: 21:58
 
 Lobend erwähnen sollte man auch, dass ich die Ablaufzeit von Snippets nicht
