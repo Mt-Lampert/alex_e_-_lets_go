@@ -34,7 +34,6 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tplSnippets := app.RawSnippetsToTpl(rawSnippets)
-	fmt.Printf("    I found %d snippets:", len(tplSnippets))
 
 	// create data object
 	data := app.buildTemplateData()
