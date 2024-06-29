@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"html/template"
 
 	"database/sql"
 	"errors"
@@ -197,7 +196,7 @@ func (app *Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {
 func (app *Application) handleUnderConstruction(w http.ResponseWriter, r *http.Request) {
 	data := app.buildTemplateData()
 
-	data.Message = template.HTML(fmt.Sprintf(`'%s' is still under Construction.<br>Sorry for the inconvenience.`, r.RequestURI))
+	data.URL = r.RequestURI
 
 	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
 }
