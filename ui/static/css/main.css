@@ -17,7 +17,7 @@ body {
     overflow-y: scroll;
 }
 
-header, nav, main, footer {
+header, nav, .flash, main, footer {
     padding: 2px calc((100% - 800px) / 2) 0;
 }
 
@@ -263,7 +263,8 @@ div.flash {
     color: #FFFFFF;
     font-weight: bold;
     background-color: #34495E;
-    padding: 18px;
+    padding-bottom: 18px;
+    padding-top: 18px;
     margin-bottom: 36px;
     text-align: center;
 }
@@ -311,3 +312,39 @@ footer {
     color: #6A6C6F;
     text-align: center;
 }
+
+.under-construction {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 1rem;
+  padding-top: 1rem;
+  width: 100%
+}
+
+.under-construction > * {
+  display: flex;
+  justify-context: center;
+  padding: .5rem 1rem;
+}
+
+.under-construction img {
+  display: inline-block;
+  /* margin: 0 auto; */
+}
+
+.under-construction p {
+  padding-top: 2rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  text-align: center
+}
+
+.uc {
+  text-align: center;
+}
+
+/*
+vim: ts=2 sw=2 fdm=indent
+*/

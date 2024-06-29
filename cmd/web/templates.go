@@ -10,6 +10,7 @@ type templateData struct {
 	CurrentYear int
 	Flash       string
 	Form        any
+	Message     template.HTML
 	Snippet     TplSnippet
 	Snippets    []TplSnippet
 }

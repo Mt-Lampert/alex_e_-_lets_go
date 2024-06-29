@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"html/template"
 
 	"database/sql"
 	"errors"
@@ -177,7 +178,7 @@ func (app *Application) handleSnippetList(w http.ResponseWriter, r *http.Request
 	fmt.Fprint(w, output)
 }
 
-func (app Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {
+func (app *Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {
 	// get the id
 	rawId := r.URL.Query().Get(`id`)
 
@@ -191,6 +192,14 @@ func (app Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, `Seems you are looking for something with id '%s'`, rawId)
+}
+
+func (app *Application) handleUnderConstruction(w http.ResponseWriter, r *http.Request) {
+	data := app.buildTemplateData()
+
+	data.Message = template.HTML(fmt.Sprintf(`'%s' is still under Construction.<br>Sorry for the inconvenience.`, r.RequestURI))
+
+	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
 }
 
 // vim: ts=4 sw=4 fdm=indent

@@ -37,6 +37,7 @@ func (app *Application) Routes() *chi.Mux {
 
 		// Endpoints with handlers as app methods
 		r.Get(`/`, app.handleHome)
+		r.Get(`/under_construction`, app.handleUnderConstruction)
 		r.Get(`/urlquery`, app.handleUrlQuery)
 		r.Get(`/snippets`, app.handleSnippetList)
 		r.Get(`/snippets/{id}`, app.handleSingleSnippetView)

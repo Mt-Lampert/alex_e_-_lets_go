@@ -7,6 +7,27 @@
 
 <!-- ## 2024-06-XX XX:XX -->
 
+## 2024-06-29 17:45
+
+Hab mir eine _„Under-Construction“_-Seite gegönnt. Brauche nur abschreiben, was
+schon vorhanden war, und anpassen.
+
+Besonders hervorzuheben war das „Nachrüsten“ von `templateData`:
+
+```go
+type templateData struct {
+	CurrentYear int
+	Flash       string
+	Form        any
+	Message     template.HTML   // <= 
+	Snippet     TplSnippet
+	Snippets    []TplSnippet
+}
+```
+
+`Message` musste hier als `template.HTML` deklariert werden, damit ich später
+HTML aufnehmen kann, das _nicht_ automatisch ‘escaped’ wird.
+
 ## 2024-06-28 10:48
 
 Habe einen SigSegFault-Error-Marathon hinter mir und dabei eine sehr, sehr wichtige Lektion gelernt:

@@ -183,4 +183,9 @@ func sessionDB() *sql.DB {
 	return sDB
 }
 
+// // turns simple string into template.HTML string
+// func stringToTempl(s string) template.HTML {
+// 	return template.HTML(s)
+// }
+
 // vim: ts=4 sw=4 fdm=indent
