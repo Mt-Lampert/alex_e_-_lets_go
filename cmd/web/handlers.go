@@ -195,9 +195,43 @@ func (app *Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {
 
 func (app *Application) handleUnderConstruction(w http.ResponseWriter, r *http.Request) {
 	data := app.buildTemplateData()
+	data.URL = fmt.Sprintf("GET %s", r.RequestURI)
 
-	data.URL = r.RequestURI
+	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
+}
 
+func (app *Application) handleSignupForm(w http.ResponseWriter, r *http.Request) {
+	data := app.buildTemplateData()
+	data.URL = fmt.Sprintf("GET %s", r.RequestURI)
+	// data.URL = r.RequestURI
+	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
+}
+
+func (app *Application) handleSignup(w http.ResponseWriter, r *http.Request) {
+	data := app.buildTemplateData()
+	data.URL = fmt.Sprintf("POST %s", r.RequestURI)
+	// data.URL = r.RequestURI
+	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
+}
+
+func (app *Application) handleLoginForm(w http.ResponseWriter, r *http.Request) {
+	data := app.buildTemplateData()
+	data.URL = fmt.Sprintf("GET %s", r.RequestURI)
+	// data.URL = r.RequestURI
+	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
+}
+
+func (app *Application) handleLogin(w http.ResponseWriter, r *http.Request) {
+	data := app.buildTemplateData()
+	data.URL = fmt.Sprintf("POST %s", r.RequestURI)
+	// data.URL = r.RequestURI
+	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
+}
+
+func (app *Application) handleLogout(w http.ResponseWriter, r *http.Request) {
+	data := app.buildTemplateData()
+	data.URL = fmt.Sprintf("POST %s", r.RequestURI)
+	// data.URL = r.RequestURI
 	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
 }
 
