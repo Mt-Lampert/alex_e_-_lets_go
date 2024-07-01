@@ -22,6 +22,13 @@ type SnippetCreateForm struct {
 	validator.Validator `form:"-"`
 }
 
+type SignupForm struct {
+	Name                string `form:"name"`
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+	validator.Validator `form:"-"`
+}
+
 func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	rawSnippets, err := db.Qs.GetAllSnippets(ctx)
@@ -202,9 +209,8 @@ func (app *Application) handleUnderConstruction(w http.ResponseWriter, r *http.R
 
 func (app *Application) handleSignupForm(w http.ResponseWriter, r *http.Request) {
 	data := app.buildTemplateData()
-	data.URL = fmt.Sprintf("GET %s", r.RequestURI)
-	// data.URL = r.RequestURI
-	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
+	data.Form = SignupForm{}
+	app.Render(w, http.StatusOK, `signup.go.html`, data)
 }
 
 func (app *Application) handleSignup(w http.ResponseWriter, r *http.Request) {
