@@ -1,6 +1,12 @@
 package validator
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+	"unicode/utf8"
+)
+
+var EmailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 // package object for methods
 type Validator struct {
@@ -76,6 +82,16 @@ func (v *Validator) PermittedInt(value int, permittedValues ...int) bool {
 		}
 	}
 	return false
+}
+
+// returns true if a string contains at least n string chars
+func (v *Validator) MinChars(s string, n int) bool {
+	return utf8.RuneCountInString(s) >= 8
+}
+
+// returns true if a string matches a pre-compiled regex
+func (v *Validator) Matches(s string, rx *regexp.Regexp) bool {
+	return rx.MatchString(s)
 }
 
 // vim: ts=4 sw=4 fdm=indent

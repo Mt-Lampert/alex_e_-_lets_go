@@ -5,7 +5,22 @@
 
 # JOURNAL
 
-<!-- ## 2024-06-XX XX:XX -->
+<!-- ## 2024-07-XX XX:XX -->
+
+## 2024-07-01 17:21
+
+Habe das Signup-Formular erfolgreich implementiert. Beim Validieren gab es aber
+eine wichtige Lektion zu lernen:
+
+> _Für jedes Formularfeld sollte es nur eine Validierung und nur eine
+> Fehlermeldung geben.
+
+So wie `validator.addFieldError()` im Moment implementiert ist, wird nur der
+erste Validierungsfehler gefunden und angezeigt. Das ist gut und schlecht
+zugleich. Es ist gut, weil dadurch nicht allzuviele Informationen über unsere
+Implementierung preisgegeben werden, auf der anderen Seite hätte man schon eine
+ausführlichere Fehlermeldung gerne, um alle Fehler „in einem Rutsch“ zu
+korrigieren und nicht erst nach 2, 3, 4 Anläufen.
 
 ## 2024-06-29 17:45
 

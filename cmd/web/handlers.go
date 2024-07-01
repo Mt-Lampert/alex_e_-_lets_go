@@ -214,10 +214,28 @@ func (app *Application) handleSignupForm(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *Application) handleSignup(w http.ResponseWriter, r *http.Request) {
-	data := app.buildTemplateData()
-	data.URL = fmt.Sprintf("POST %s", r.RequestURI)
-	// data.URL = r.RequestURI
-	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
+	var form SignupForm
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.ClientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// validate the form fields
+	form.CheckField(form.NotBlank(form.Name), `Name`, `'Name' cannot be blank!`)
+	form.CheckField(form.NotBlank(form.Email), `Email`, `'Email' cannot be blank!`)
+	form.CheckField(form.Matches(form.Email, validator.EmailRegex), `email`, `'Email' must be a valid email address!`)
+	form.CheckField(form.NotBlank(form.Password), `Password`, `'Password' cannot be blank!`)
+	form.CheckField(form.MinChars(form.Password, 8), `Password`, `'Password' must be at least 8 characters long!`)
+
+	if !form.Valid() {
+		data := app.buildTemplateData()
+		data.Form = form
+		app.Render(w, http.StatusUnprocessableEntity, `signup.go.html`, data)
+		return
+	}
+
+	fmt.Fprintln(w, `Validation of Signup Form Values OK.`)
 }
 
 func (app *Application) handleLoginForm(w http.ResponseWriter, r *http.Request) {
