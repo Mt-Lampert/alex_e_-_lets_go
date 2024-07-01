@@ -7,21 +7,21 @@
 		{{ with .Form.FieldErrors.Name }}
 		<label for="name" class="error">{{ . }}</label>
 		{{ end }}
-		<input type="text" value="{{.Form.Name}}">
+		<input type="text" name="name" value="{{.Form.Name}}">
 	</div>
 	<div>
-		<label for="email">Name</label>
+		<label for="email">Email</label>
 		{{ with .Form.FieldErrors.Email }}
 		<label for="email" class="error">{{ . }}</label>
 		{{ end }}
-		<input type="email" value="{{.Form.Email}}">
+		<input type="email" name="email" value="{{.Form.Email}}">
 	</div>
 	<div>
-		<label for="password">Name</label>
+		<label for="password">Password</label>
 		{{ with .Form.FieldErrors.Password }}
 		<label for="password" class="error">{{ . }}</label>
 		{{ end }}
-		<input type="password" value="{{.Form.Password}}">
+		<input type="password" name="password" value="{{.Form.Password}}">
 	</div>
 	<div>
 		<input type="submit" value="Sign Up">
