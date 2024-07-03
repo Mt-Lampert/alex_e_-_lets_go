@@ -19,7 +19,7 @@ func (v *Validator) Valid() bool {
 }
 
 // Adds error message to the FieldErrors map; private to this module
-func (v *Validator) addFieldError(key, msg string) {
+func (v *Validator) AddFieldError(key, msg string) {
 	// initialize map, if necessary
 	if v.FieldErrors == nil {
 		v.FieldErrors = make(map[string]string)
@@ -34,7 +34,7 @@ func (v *Validator) addFieldError(key, msg string) {
 // Adds error message if an entry fails its validation check
 func (v *Validator) CheckField(ok bool, key, msg string) {
 	if !ok {
-		v.addFieldError(key, msg)
+		v.AddFieldError(key, msg)
 	}
 }
 

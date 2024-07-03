@@ -12,6 +12,7 @@ import (
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
 	"github.com/MtLampert/alex_e_-_lets_go/internal/validator"
 	"github.com/go-chi/chi/v5"
+	"github.com/mattn/go-sqlite3"
 )
 
 // type for saving and validating form data for use in a snippet Template
@@ -214,6 +215,7 @@ func (app *Application) handleSignupForm(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *Application) handleSignup(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
 	var form SignupForm
 	err := app.decodePostForm(r, &form)
 	if err != nil {
@@ -235,7 +237,44 @@ func (app *Application) handleSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintln(w, `Validation of Signup Form Values OK.`)
+	//
+	// insert user data into database
+	// ==============================
+	//
+	// create a Hashed Password from form.Password
+	hashedPassword, err := encryptPassword(form.Password)
+	if err != nil {
+		app.ServerError(w, err)
+		return
+	}
+	// build insertion object
+	iup := db.InsertUserParams{
+		Name:           form.Name,
+		Email:          form.Email,
+		HashedPassword: hashedPassword,
+	}
+	// insert into DB
+	_, err = db.Qs.InsertUser(ctx, iup)
+	if err != nil {
+		// is it an sqlite3 error?
+		if sqlite3Err, ok := err.(sqlite3.Error); ok {
+			// is it an sqlite3.ErrConstraint error?
+			if sqlite3Err.Code == sqlite3.ErrNo(sqlite3.ErrConstraint) {
+				// fmt.Println(`    DB Constraint Error!`)
+				form.AddFieldError(`Email`, `Sorry, this email address is already taken!`)
+				data := app.buildTemplateData()
+				data.Form = form
+				app.Render(w, http.StatusUnprocessableEntity, `signup.go.html`, data)
+				return
+			}
+		}
+	}
+
+	// apply the good news
+	app.sessionManager.Put(r.Context(), `Flash`, `Your Signup was successful. Please log in!`)
+
+	// redirect to login
+	http.Redirect(w, r, `/user/login_form`, http.StatusSeeOther)
 }
 
 func (app *Application) handleLoginForm(w http.ResponseWriter, r *http.Request) {

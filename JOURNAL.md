@@ -7,20 +7,72 @@
 
 <!-- ## 2024-07-XX XX:XX -->
 
+## 2024-07-03 21:07
+
+Der Signup-Vorgang wurde erfolgreich implementiert! Halleluja! War wieder ein
+hartes Stück Arbeit, weil ich mit _SQLc_ und _SQLite3_ arbeite – aber am Ende
+ging alles super gut!
+
+Besonders heikel war die Überprüfung, ob die E-Mail-Adresse in der Datenbank
+schon vergeben war. Folgender Code hat sich dieser Aufgabe angenommen:
+
+```go
+// file: handlers.go
+
+func (app *Application) handleSignup(w http.ResponseWriter, r *http.Request) {
+	//
+	// insert user data into database
+	// ==============================
+	//
+	// create a Hashed Password from form.Password
+	hashedPassword, err := encryptPassword(form.Password)
+	if err != nil {
+		app.ServerError(w, err)
+		return
+	}
+	// build insertion object
+	iup := db.InsertUserParams{
+		Name:           form.Name,
+		Email:          form.Email,
+		HashedPassword: hashedPassword,
+	}
+	// insert into DB
+	_, err = db.Qs.InsertUser(ctx, iup)
+	if err != nil {
+		// is it an sqlite3 error?  -1-
+		if sqlite3Err, ok := err.(sqlite3.Error); ok {
+			// is it an sqlite3.ErrConstraint error? -2-
+			if sqlite3Err.Code == sqlite3.ErrNo(sqlite3.ErrConstraint) {
+				form.AddFieldError(`Email`, `Sorry, this email address is already taken!`)
+				data := app.buildTemplateData()
+				data.Form = form
+				app.Render(w, http.StatusUnprocessableEntity, `signup.go.html`, data)
+				return
+			}
+		}
+	}
+}
+```
+
+Das wird wohl nicht ohne Anmerkungen gehen:
+
+1. `err.(sqlite3.Error)` ist eine [Type
+   Assertion](https://medium.com/@jamal.kaksouri/mastering-type-assertion-in-go-a-comprehensive-guide-216864b4ea4d).
+   Wir haben den starken Verdacht, dass `err`, ein `interface{}`, in diesem
+   Konkreten Fall ein `sqlite3.Error` ist; wenn diese Aussage `ok` ist, wird jetzt
+   `err` als „richtiger“ `sqlite3.Error` behandelt und der Variablen `sqlite3Err`
+   zugewiesen.
+2. Jetzt, wo `sqlite3Err` ein „sicherer“ `sqlite3.Error` ist, können wir mit
+   seinen Methoden und Variablen arbeiten. Wie das hier in diesem Fall genau
+   funktioniert, das verrät uns die `:GoDoc`-Befehl in Neovim.
+
 ## 2024-07-01 17:21
 
-Habe das Signup-Formular erfolgreich implementiert. Beim Validieren gab es aber
-eine wichtige Lektion zu lernen:
+Habe das Signup-Formular erfolgreich implementiert. Beim Validieren gab es aber eine wichtige Lektion zu lernen:
 
-> _Für jedes Formularfeld sollte es nur eine Validierung und nur eine
-> Fehlermeldung geben.
+> _Für jedes Formularfeld sollte es nur eine Validierung und nur eine Fehlermeldung geben.
 
-So wie `validator.addFieldError()` im Moment implementiert ist, wird nur der
-erste Validierungsfehler gefunden und angezeigt. Das ist gut und schlecht
-zugleich. Es ist gut, weil dadurch nicht allzuviele Informationen über unsere
-Implementierung preisgegeben werden, auf der anderen Seite hätte man schon eine
-ausführlichere Fehlermeldung gerne, um alle Fehler „in einem Rutsch“ zu
-korrigieren und nicht erst nach 2, 3, 4 Anläufen.
+So wie `validator.Validator` und seine Methoden im Moment implementiert ist,
 
 ## 2024-06-29 17:45
 
@@ -62,11 +114,11 @@ mehr in der Datenbank berechnen lasse, sondern in _Go._ Ab jetzt wird das Feld
 darüber entschieden, ob ein Snippet abgelaufen ist oder nicht.
 
 ```go
-return created.AddDate(0, 0, timeoutMap[expires]).Before(now)
-```
-Dieser Code erledigt alles
-
-## 2024-06-27 21:45
+Ich möchte mal lobend erwähnen, dass ich die Ablaufzeit von Snippets nicht
+mehr in der Datenbank berechnen lasse, sondern in _Go._ Ab jetzt wird das Feld
+`ends` in der Datenbank nicht mehr berechnet, sondern einfach der Wert von
+`expires` zurückgegeben und dann in der Hilfsfunktion `snippetExpired()`
+darüber entschieden, ob ein Snippet abgelaufen ist oder nicht.
 
 Ich musste heute einen Fehler im `handleHome()`-Handler beheben: Bei der
 Anzeige der Snippets kam es zu „blinden“ Leerzeilen in der Tabelle. Das war
@@ -124,6 +176,21 @@ func (app *Application) Routes() *chi.Mux {
 
 		// routes
 		r.Get(`/`, app.handleHome)
+		// Endpoints with handlers as app methods
+		r.Get(`/urlquery`, app.handleUrlQuery)
+		r.Get(`/snippets`, app.handleSnippetList)
+		r.Get(`/snippets/{id}`, app.handleSingleSnippetView)
+		r.Get(`/new/snippet`, app.handleNewSnippetForm)
+		r.Post(`/create/snippet`, app.handleNewSnippet)
+	})
+
+	// ...
+}
+```
+
+_Chi_ erstellt hier hinter den Kulissen einen Sub-Router mit eigenen Routen und
+einer eigenen Middleware für diese Routen (zusätzlich zu den allgemeinen
+Middlewares), und bindet diesen Sub-Router hinterher in `mux` ein. Im Code ist
 		// Endpoints with handlers as app methods
 		r.Get(`/urlquery`, app.handleUrlQuery)
 		r.Get(`/snippets`, app.handleSnippetList)
@@ -1368,21 +1435,6 @@ zwischen der HTTP-Methode und dem Endpoint steht.
 func handleHome(w http.ResponseWriter, r *http.Request) {
 	// Write() accepts only []byte as ‘most neutral’ message type
 	w.Write([]byte(`Hello from Snippetbox!`))
-}
-
-func main() {
-	// use the http.NewServeMux() constructor to initialize a new servemux (router),
-	// then register the home() function as handler for the `/` endpoint.
-	mux := http.NewServeMux()
-	// This is how it's done in go 1.22+
-	mux.HandleFunc(`GET /`, handleHome)
-
-	// Use the http.ListenAndServe() function as web serving unit. It accepts two parameters:
-	//   - the URL (which will be `localhost:3000` here)
-	//   - the router we just created.
-	// If the webserver returns an error, we handle it using log.Fatal() to log the error and exit.
-	// Note that any error returned by http.ListenAndServe() is non-nil!
-	log.Println("starting server at port :3000")
 	err := http.ListenAndServe(":3000", mux)
 	if err != nil {
 		log.Fatalf("Uh oh! %s", err)

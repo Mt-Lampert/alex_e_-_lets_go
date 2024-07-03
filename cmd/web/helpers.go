@@ -14,6 +14,7 @@ import (
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
 	"github.com/go-playground/form/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type TplSnippet struct {
@@ -183,9 +184,13 @@ func sessionDB() *sql.DB {
 	return sDB
 }
 
-// // turns simple string into template.HTML string
-// func stringToTempl(s string) template.HTML {
-// 	return template.HTML(s)
-// }
+// encrypts user password into bcrypt hash
+func encryptPassword(pw string) (string, error) {
+	hashedPW, err := bcrypt.GenerateFromPassword([]byte(pw), 12)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPW), nil
+}
 
 // vim: ts=4 sw=4 fdm=indent

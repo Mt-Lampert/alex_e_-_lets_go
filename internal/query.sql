@@ -13,5 +13,15 @@ LIMIT 10;
 -- name: InsertSnippet :one
 INSERT INTO snippets (title, content, expires)
 VALUES (?, ?, ?)
-RETURNING id, title created;
+RETURNING id, title, created;
 	
+-- name: InsertUser :one
+INSERT INTO users (name, email, hashed_password)
+VALUES (?, ?, ?)
+RETURNING id, name, email, created;
+
+-- name: GetUser :one
+SELECT id, name, hashed_password FROM users
+WHERE email = ?;
+
+
