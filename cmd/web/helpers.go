@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -191,6 +192,30 @@ func encryptPassword(pw string) (string, error) {
 		return "", err
 	}
 	return string(hashedPW), nil
+}
+
+func Authenticate(email, password string) (int64, error) {
+	ctx := context.Background()
+
+	userRow, err := db.Qs.GetUser(ctx, email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(userRow.HashedPassword), []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+
+	return userRow.ID, nil
 }
 
 // vim: ts=4 sw=4 fdm=indent

@@ -7,64 +7,75 @@
 
 <!-- ## 2024-07-XX XX:XX -->
 
-## 2024-07-03 21:07
+## 2024-07-05 22:08
 
-Der Signup-Vorgang wurde erfolgreich implementiert! Halleluja! War wieder ein
-hartes Stück Arbeit, weil ich mit _SQLc_ und _SQLite3_ arbeite – aber am Ende
-ging alles super gut!
+Habe gerade das komplete Login-Kapitel aus dem Buch fertig gemacht. War eigentlich gar nicht so schwer -- aber es wird lange dauern, bis ich hier Routine habe.
 
-Besonders heikel war die Überprüfung, ob die E-Mail-Adresse in der Datenbank
-schon vergeben war. Folgender Code hat sich dieser Aufgabe angenommen:
+Viel zu erklären gibt es da nicht. Es geht im Grunde um dieses Feature:
 
-```go
-// file: handlers.go
+```gherkin
+Feature: Login
 
-func (app *Application) handleSignup(w http.ResponseWriter, r *http.Request) {
-	//
-	// insert user data into database
-	// ==============================
-	//
-	// create a Hashed Password from form.Password
-	hashedPassword, err := encryptPassword(form.Password)
-	if err != nil {
-		app.ServerError(w, err)
-		return
-	}
-	// build insertion object
-	iup := db.InsertUserParams{
-		Name:           form.Name,
-		Email:          form.Email,
-		HashedPassword: hashedPassword,
-	}
-	// insert into DB
-	_, err = db.Qs.InsertUser(ctx, iup)
-	if err != nil {
-		// is it an sqlite3 error?  -1-
-		if sqlite3Err, ok := err.(sqlite3.Error); ok {
-			// is it an sqlite3.ErrConstraint error? -2-
-			if sqlite3Err.Code == sqlite3.ErrNo(sqlite3.ErrConstraint) {
-				form.AddFieldError(`Email`, `Sorry, this email address is already taken!`)
-				data := app.buildTemplateData()
-				data.Form = form
-				app.Render(w, http.StatusUnprocessableEntity, `signup.go.html`, data)
-				return
-			}
-		}
-	}
-}
+	As a guest user
+	I want to log in
+	In order to have more rights and possibilities using this site
+
+	Scenario: Opening the Login Form
+		When I open the Login Form
+		Then I see a text field to enter my email
+		And I see a password field to enter my password
+		And I see a button to submit the form to the backend.
+
+	Scenario: Logging in with an empty email field
+		Given I have filled out the fields
+		When I submit with an empty email field
+		Then the form is sent back to me
+		And I am told the email field cannot be empty.
+
+	Scenario: Logging in with an invalid email
+		Given I have filled out the fields
+		When I submit with an invalid email address
+		Then the form is sent back to me
+		And I am told the email field must contain a valid email address
+
+	Scenario: Logging in with an empty password field
+		Given I have filled out the fields
+		When I submit with an empty password field
+		Then the form is sent back to me
+		And I am told the password field cannot be empty.
+
+	Scenario: Logging in with an invalid password
+		Given I have filled out the fields
+		When I submit with an invalid passport 
+		Then the form is sent back to me
+		And I am told the password field must contain at least 8 characters
+
+	Scenario: Logging in with an email address not found in the DB
+		Given I have filled out the fields
+		When I submit with both valid email and password data
+		And the email is unknown to the database
+		Then the form is sent back to me
+		And I am told that email or password is incorrect
+
+	Scenario: Successful Login
+		Given I have filled out the fields
+		When I submit with both valid email and password data
+		And the email is known to the database
+		And the password is recognized to be correct,
+		Then I am redirected to the 'Create Snippet' page
+		And I see no links for 'Login' or 'Sign Up' in the navbar
+		And instead I see a link for 'Logout' in the navbar.
 ```
 
-Das wird wohl nicht ohne Anmerkungen gehen:
+Folgende _Specs_ wurden dafür implementiert:
 
-1. `err.(sqlite3.Error)` ist eine [Type
-   Assertion](https://medium.com/@jamal.kaksouri/mastering-type-assertion-in-go-a-comprehensive-guide-216864b4ea4d).
-   Wir haben den starken Verdacht, dass `err`, ein `interface{}`, in diesem
-   Konkreten Fall ein `sqlite3.Error` ist; wenn diese Aussage `ok` ist, wird jetzt
-   `err` als „richtiger“ `sqlite3.Error` behandelt und der Variablen `sqlite3Err`
-   zugewiesen.
-2. Jetzt, wo `sqlite3Err` ein „sicherer“ `sqlite3.Error` ist, können wir mit
-   seinen Methoden und Variablen arbeiten. Wie das hier in diesem Fall genau
-   funktioniert, das verrät uns die `:GoDoc`-Befehl in Neovim.
+1. `Authenticate()` (Hilfsfunktion): Hier findet die eigentliche
+   Authentifizierung statt. Die Kommentare erklären, was im einzelnen läuft.
+2. `handleLogin()`. Auch hier erklärt sich vieles selbst. Aber eine Sache
+   verdient es, noch besonders erläutert zu werden: `RenewToken()`. Hier wird
+   _nur_ der Token erneuert, der die Session definiert; alle anderen Daten in der
+   Session-Datenbank bleiben wie sie sind.
+
 
 ## 2024-07-01 17:21
 
@@ -114,16 +125,83 @@ mehr in der Datenbank berechnen lasse, sondern in _Go._ Ab jetzt wird das Feld
 darüber entschieden, ob ein Snippet abgelaufen ist oder nicht.
 
 ```go
-Ich möchte mal lobend erwähnen, dass ich die Ablaufzeit von Snippets nicht
-mehr in der Datenbank berechnen lasse, sondern in _Go._ Ab jetzt wird das Feld
-`ends` in der Datenbank nicht mehr berechnet, sondern einfach der Wert von
-`expires` zurückgegeben und dann in der Hilfsfunktion `snippetExpired()`
-darüber entschieden, ob ein Snippet abgelaufen ist oder nicht.
+return created.AddDate(0, 0, timeoutMap[expires]).Before(now)
+```
+Dieser Code erledigt alles
+
+## 2024-06-27 21:45
 
 Ich musste heute einen Fehler im `handleHome()`-Handler beheben: Bei der
 Anzeige der Snippets kam es zu „blinden“ Leerzeilen in der Tabelle. Das war
 richtig Kacke.
 
+Was war das Problem? Diese Zeile in `app.RawSnippetsToTpl()`:
+
+```go
+lenRS := cap(rs)
+lenRS = len(rs)
+var tsp = make([]TplSnippet, lenRS)
+```
+
+Damit wurden 5 (aktuelle Anzahl der Snippet-Einträge in der Datenbank) oder gar
+8 (Kapazität des []rs-Slices) Plätze für `tsp` reserviert – obwohl am Ende nur
+2 gebraucht wurden, nämlich die zwei, die gegenwärtig nicht abgelaufen waren.
+
+Dieser Code hier macht es jetzt richtig:
+
+```go
+var tsp = make([]TplSnippet, 0)
+
+for _, r in range rs {
+	// -> KEIN Leereintrag!
+	if r.created.Valid {
+		// ...
+		tsp = append(tsp, TplSnippet{ /* ... */ }
+	}
+}
+```
+
+So bleiben die übrig, die tatsächlich angezeigt werden sollen.
+
+
+## 2024-06-26 16:06
+
+Ich habe jetzt das _SCS_-Paket von Alex Edwards für Session-Management
+heruntergeladen und eingebaut. Zwei Dinge sind dabei besonders interessant:
+
+#### Die Einbindung in das _Chi_-Framework
+
+Die erfolgt mit Hilfe einer
+[Group](https://go-chi.io/#/pages/routing?id=routing-groups). Im Code sieht das
+so aus:
+
+```go
+// file: ./cmd/web/routes.go
+func (app *Application) Routes() *chi.Mux {
+	// ...
+	
+	// define a new subgroup with its own sub-router 'r'
+	mux.Group(func(r chi.Router) {
+		// middleware for this group
+		r.Use(app.sessionManager.LoadAndSave)
+
+		// routes
+		r.Get(`/`, app.handleHome)
+		// Endpoints with handlers as app methods
+		r.Get(`/urlquery`, app.handleUrlQuery)
+		r.Get(`/snippets`, app.handleSnippetList)
+		r.Get(`/snippets/{id}`, app.handleSingleSnippetView)
+		r.Get(`/new/snippet`, app.handleNewSnippetForm)
+		r.Post(`/create/snippet`, app.handleNewSnippet)
+	})
+
+	// ...
+}
+```
+
+_Chi_ erstellt hier hinter den Kulissen einen Sub-Router mit eigenen Routen und
+einer eigenen Middleware für diese Routen (zusätzlich zu den allgemeinen
+Middlewares), und bindet diesen Sub-Router hinterher in `mux` ein. Im Code ist
 Was war das Problem? Diese Zeile in `app.RawSnippetsToTpl()`:
 
 ```go
@@ -1368,73 +1446,6 @@ func (p Proxy) handleXyz(w http.ResponseWriter, r *http.Request) {
 bedeutet _create or reset,_ das, was der `>`-Operator in der Shell macht.
 
 ```bash
-$ curl -i http://localhost:8080 -H 'header01: foo' -H 'header0: bar'
-HTTP/1.1 200 OK
-Content-Length: 34
-Content-Type: text/plain; charset=utf-8
-Date: Tue, 17 Jan 2023 20:46:34 GMT
-
-header01: [head1 foo], header02: [bar]
-```
-
-
-
-## 2024-06-01 18:33
-
-Hier geht es um URL-Parameter und wie man im Handler an sie herankommt
-
-```go
-// Add a handler function for viewing a specific snippet
-func handleSingleSnippetView(w http.ResponseWriter, r *http.Request) {
-	// this is how we get URL variables (see below); 
-	// they will always be strings or more exactly, []byte chains
-	id := r.PathValue(`id`)
-	w.Write([]byte(fmt.Sprintf("Display snippet with ID '%s'", id)))
-}
-
-func main() {
-	// use the http.NewServeMux() constructor to initialize a new servemux (router),
-	// then register the home() function as handler for the `/` endpoint.
-	mux := http.NewServeMux()
-
-	// This is an endpoint with URL parameters
-	mux.HandleFunc(`GET /snippets/{id}`, handleSingleSnippetView)
-}
-```
-
-## 2024-06-01 17:53
-
-Wir haben unsere Routes um ein einfaches `POST` erweitert:
-
-```go
-// Add a handler function for creating a snippet.
-func handleNewSnippet(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(`Creating a new snippet ...`))
-}
-
-func main() {
-	// use the http.NewServeMux() constructor to initialize a new servemux (router),
-	// then register the home() function as handler for the `/` endpoint.
-	mux := http.NewServeMux()
-
-	mux.HandleFunc(`GET /`, handleHome)
-	// This is how we add a POST endpoint in go 1.22
-	mux.HandleFunc(`POST /new`, handleNewSnippet)
-    // ...
-}
-```
-
-Wichtig für `mux.HandleFunc()` ist, dass nur __ein einziges__ Leerzeichen
-zwischen der HTTP-Methode und dem Endpoint steht.
-
-## 2024-05-30 17:39
-
-```go
-// Define a simple home Handler function which writes a byte slice
-// containing "Hello from Snippetbox" as a response body
-func handleHome(w http.ResponseWriter, r *http.Request) {
-	// Write() accepts only []byte as ‘most neutral’ message type
-	w.Write([]byte(`Hello from Snippetbox!`))
 	err := http.ListenAndServe(":3000", mux)
 	if err != nil {
 		log.Fatalf("Uh oh! %s", err)

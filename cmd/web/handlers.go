@@ -291,10 +291,53 @@ func (app *Application) handleLoginForm(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *Application) handleLogin(w http.ResponseWriter, r *http.Request) {
-	data := app.buildTemplateData()
-	data.URL = fmt.Sprintf("POST %s", r.RequestURI)
-	// data.URL = r.RequestURI
-	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
+	// decode the data from the form in the request into LoginForm
+	var form LoginForm
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.ClientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// Validations
+	form.CheckField(form.NotBlank(form.Email), `Email`, `Email cannot be blank!`)
+	form.CheckField(form.Matches(form.Email, validator.EmailRegex), `Email`, `Please enter a regular email!`)
+	form.CheckField(form.NotBlank(form.Password), `Password`, `Password cannot be blank!`)
+
+	if !form.Valid() {
+		data := app.buildTemplateData()
+		data.Form = form
+		app.Render(w, http.StatusUnprocessableEntity, `login.go.html`, data)
+		return
+	}
+
+	// check the credentials
+	userId, err := Authenticate(form.Email, form.Password)
+	if err != nil {
+		if errors.Is(err, ErrInvalidCredentials) {
+			form.AddNonFieldError(`Email or Password is incorrect.`)
+			data := app.buildTemplateData()
+			data.Form = form
+			app.Render(w, http.StatusUnprocessableEntity, `login.go.html`, data)
+		} else {
+			app.ServerError(w, err)
+		}
+		return
+	}
+
+	// renew the session token or create it if it doesn't exist
+	err = app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.ServerError(w, err)
+		return
+	}
+
+	// Since we made it here, add the ID of the user to the session.
+	// Now the user is officially ‘logged in’
+	app.sessionManager.Put(r.Context(), `userID`, userId)
+
+	// Redirect the user to the ‘Create Snippet’ page
+	http.Redirect(w, r, `/new/snippet`, http.StatusSeeOther)
 }
 
 func (app *Application) handleLogout(w http.ResponseWriter, r *http.Request) {
