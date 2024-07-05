@@ -9,7 +9,9 @@
 
 ## 2024-07-05 22:08
 
-Habe gerade das komplete Login-Kapitel aus dem Buch fertig gemacht. War eigentlich gar nicht so schwer -- aber es wird lange dauern, bis ich hier Routine habe.
+Habe gerade den kompletten Login-Abschnitt aus dem Buch fertig gemacht. War
+eigentlich gar nicht so schwer -- aber es wird lange dauern, bis ich hier
+Routine habe.
 
 Viel zu erklären gibt es da nicht. Es geht im Grunde um dieses Feature:
 
