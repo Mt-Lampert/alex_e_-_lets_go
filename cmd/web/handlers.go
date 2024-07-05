@@ -30,6 +30,12 @@ type SignupForm struct {
 	validator.Validator `form:"-"`
 }
 
+type LoginForm struct {
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+	validator.Validator `form:"-"`
+}
+
 func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	rawSnippets, err := db.Qs.GetAllSnippets(ctx)
@@ -279,9 +285,9 @@ func (app *Application) handleSignup(w http.ResponseWriter, r *http.Request) {
 
 func (app *Application) handleLoginForm(w http.ResponseWriter, r *http.Request) {
 	data := app.buildTemplateData()
-	data.URL = fmt.Sprintf("GET %s", r.RequestURI)
+	data.Form = LoginForm{}
 	// data.URL = r.RequestURI
-	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
+	app.Render(w, http.StatusOK, `login.go.html`, data)
 }
 
 func (app *Application) handleLogin(w http.ResponseWriter, r *http.Request) {

@@ -1,0 +1,30 @@
+{{ define "title" }}Login{{ end }}
+
+{{ define "main" }}
+<form action="/user/login" method="post">
+  {{ range .Form.NonFieldErrors }}
+  <div class="error">{{ . }}</div>
+  {{ end }}
+  <div>
+    <label for="email">Email:</label>
+    {{ with .Form.FieldErrors.Email }}
+    <label for="email">{{ . }}</label>
+    {{ end }}
+    <input type="email" name="email" value="{{ .Form.Email }}">
+  </div>
+  <div>
+    <label for="password">Password:</label>
+    {{ with .Form.FieldErrors.Password }}
+    <label for="password">{{ . }}</label>
+    {{ end }}
+    <input type="password" name="password">
+  </div>
+  <div>
+    <input type="submit" value="Login">
+  </div>
+</form>
+{{ end }}
+
+<!--
+vim: ts=2 sw=2 fdm=indent
+-->

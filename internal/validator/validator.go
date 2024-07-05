@@ -10,12 +10,13 @@ var EmailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z
 
 // package object for methods
 type Validator struct {
-	FieldErrors map[string]string
+	FieldErrors    map[string]string
+	NonFieldErrors []string
 }
 
 // returns if the FieldErrors map is empty
 func (v *Validator) Valid() bool {
-	return len(v.FieldErrors) == 0
+	return len(v.FieldErrors) == 0 && len(v.NonFieldErrors) == 0
 }
 
 // Adds error message to the FieldErrors map; private to this module
@@ -29,6 +30,10 @@ func (v *Validator) AddFieldError(key, msg string) {
 	if _, exists := v.FieldErrors[key]; !exists {
 		v.FieldErrors[key] = msg
 	}
+}
+
+func (v *Validator) AddNonFieldError(msg string) {
+	v.NonFieldErrors = append(v.NonFieldErrors, msg)
 }
 
 // Adds error message if an entry fails its validation check
