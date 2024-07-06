@@ -7,6 +7,41 @@
 
 <!-- ## 2024-07-XX XX:XX -->
 
+## 2024-07-06 20:29
+
+Wir kommen jetzt zum großen thema __Autorisierung.__ Wir werden es genau so
+aufdröseln wie wir es bei größeren Projekten immer machen – mit _Features._
+
+```gherkin
+Feature: Authorization
+
+	As a logged-in user
+	I want to be authorized
+	In order to have exclusive functionality available for me.
+
+Scenario: create new snippet
+	Given I am logged-in
+	Then I see a link 'Create Snippet' in the navbar
+	When I click on the link
+	Then I am being taken to the 'Create Snippet' page
+
+Scenario: Sneaking into Creating a new snippet
+	Given I am logged out
+	When I try to use '/new/snippet' to sneak into the 'Create Snippet' form
+	Then I am redirected to the 'Login' page.
+	
+
+Scenario: Studying navbar as logged-in user
+	Given I am logged in
+	When I take a look at the navbar
+	Then I see links to 'Home', 'Create Snippet' and 'Logout'
+
+Scenario: Studying navbar as logged-out user
+	Given I am logged-out
+	When I take a look at the navbar
+	Then I see links to 'Home', 'Log In' and 'Log Out'
+```
+
 ## 2024-07-06 20:14
 
 Logout-Feature implementiert. Sollte mir in _Obsidian_ eine Übersicht über die
