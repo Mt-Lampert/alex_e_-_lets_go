@@ -44,7 +44,7 @@ func (app *Application) Routes() *chi.Mux {
 		r.Get(`/urlquery`, app.handleUrlQuery)
 		r.Get(`/user/login_form`, app.handleLoginForm)
 		r.Post(`/user/login`, app.handleLogin)
-		r.Post(`/user/logout`, app.handleLogout)
+		r.Get(`/user/logout`, app.handleLogout)
 		r.Get(`/user/signup_form`, app.handleSignupForm)
 		r.Post(`/user/signup`, app.handleSignup)
 	})

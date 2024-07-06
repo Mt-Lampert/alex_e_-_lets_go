@@ -7,6 +7,13 @@
 
 <!-- ## 2024-07-XX XX:XX -->
 
+## 2024-07-06 20:14
+
+Logout-Feature implementiert. Sollte mir in _Obsidian_ eine Übersicht über die
+verschiedenen Webapp-Techniken zusammenstellen und mit Beispielen aus diesem
+Projekt unterlegen. So langsam verliere ich die Orientierung, und das ist ein
+schlimmes Zeichen.
+
 ## 2024-07-05 22:08
 
 Habe gerade den kompletten Login-Abschnitt aus dem Buch fertig gemacht. War

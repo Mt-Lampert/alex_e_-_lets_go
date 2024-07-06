@@ -341,10 +341,18 @@ func (app *Application) handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) handleLogout(w http.ResponseWriter, r *http.Request) {
-	data := app.buildTemplateData()
-	data.URL = fmt.Sprintf("POST %s", r.RequestURI)
-	// data.URL = r.RequestURI
-	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
+	// First, renew the token!
+	err := app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.ServerError(w, err)
+		return
+	}
+	// this ‘logs out’ the user!
+	app.sessionManager.Remove(r.Context(), `userID`)
+	// flash message to inform the user
+	app.sessionManager.Put(r.Context(), `Flash`, `You have been successfully logged out!`)
+	// redirect to the landing page
+	http.Redirect(w, r, `/`, http.StatusSeeOther)
 }
 
 // vim: ts=4 sw=4 fdm=indent
