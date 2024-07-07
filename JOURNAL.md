@@ -7,9 +7,14 @@
 
 <!-- ## 2024-07-XX XX:XX -->
 
+## 2024-07-07 09:13
+
+Die Autorisierung trägt die ersten Früchte: Die Navbar hat ihre Scenarios des
+‘Authorization’-Features implementiert.
+
 ## 2024-07-06 20:29
 
-Wir kommen jetzt zum großen thema __Autorisierung.__ Wir werden es genau so
+Wir kommen jetzt zum großen Thema __Autorisierung.__ Wir werden es genau so
 aufdröseln wie wir es bei größeren Projekten immer machen – mit _Features._
 
 ```gherkin
@@ -30,7 +35,6 @@ Scenario: Sneaking into Creating a new snippet
 	When I try to use '/new/snippet' to sneak into the 'Create Snippet' form
 	Then I am redirected to the 'Login' page.
 	
-
 Scenario: Studying navbar as logged-in user
 	Given I am logged in
 	When I take a look at the navbar
@@ -39,7 +43,7 @@ Scenario: Studying navbar as logged-in user
 Scenario: Studying navbar as logged-out user
 	Given I am logged-out
 	When I take a look at the navbar
-	Then I see links to 'Home', 'Log In' and 'Log Out'
+	Then I see links to 'Home', 'Log In' and 'Sign Up'
 ```
 
 ## 2024-07-06 20:14

@@ -2,12 +2,17 @@
 <nav>
   <div>
     <a href="/">Home</a>
+    {{ if .IsAuthenticated }}
     <a href="/new/snippet">Create Snippet</a>
+    {{ end }}
   </div>
   <div>
+    {{ if .IsAuthenticated }}
+    <a href="/user/logout">Log out</a>
+    {{ else }}
     <a href="/user/login_form">Login</a>
     <a href="/user/signup_form">Sign Up</a>
-    <a href="/user/logout">Log out</a>
+    {{ end }}
   </div>
 </nav>
 {{ end }}

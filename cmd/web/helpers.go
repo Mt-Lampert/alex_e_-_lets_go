@@ -119,8 +119,12 @@ func (app *Application) Render(
 }
 
 // factory helper to build a templateData instance
-func (app *Application) buildTemplateData() *templateData {
-	return &templateData{CurrentYear: time.Now().Year()}
+func (app *Application) buildTemplateData(r *http.Request) *templateData {
+	return &templateData{
+		CurrentYear:     time.Now().Year(),
+		Flash:           app.sessionManager.PopString(r.Context(), `flash`),
+		IsAuthenticated: app.isAuthenticated(r),
+	}
 }
 
 // checks if 'title' form value is valid
@@ -216,6 +220,11 @@ func Authenticate(email, password string) (int64, error) {
 	}
 
 	return userRow.ID, nil
+}
+
+// returns true if user is authenticated, false if not
+func (app *Application) isAuthenticated(r *http.Request) bool {
+	return app.sessionManager.Exists(r.Context(), `userID`)
 }
 
 // vim: ts=4 sw=4 fdm=indent

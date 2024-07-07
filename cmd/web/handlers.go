@@ -50,7 +50,7 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 	tplSnippets := app.RawSnippetsToTpl(rawSnippets)
 
 	// create data object
-	data := app.buildTemplateData()
+	data := app.buildTemplateData(r)
 
 	data.Snippets = tplSnippets
 
@@ -59,7 +59,7 @@ func (app *Application) handleHome(w http.ResponseWriter, r *http.Request) {
 
 // A handler function to show a "Create Snippet" form
 func (app Application) handleNewSnippetForm(w http.ResponseWriter, r *http.Request) {
-	data := app.buildTemplateData()
+	data := app.buildTemplateData(r)
 	// will check 'One Month' in the 'Expires' section in the template
 	data.Form = SnippetCreateForm{
 		Expires: `1 month`,
@@ -112,7 +112,7 @@ func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) 
 	// evaluate the errors
 	if !form.Valid() {
 		// fmt.Println("There are form errors here!")
-		data := app.buildTemplateData()
+		data := app.buildTemplateData(r)
 		data.Form = form
 		app.Render(w, http.StatusUnprocessableEntity, `createSnippet.go.html`, data)
 		return
@@ -131,7 +131,7 @@ func (app Application) handleNewSnippet(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// add flash message to the session
-	app.sessionManager.Put(r.Context(), `flash`, `New snippet successfully created!`)
+	app.sessionManager.Put(r.Context(), `Flash`, `New snippet successfully created!`)
 
 	url := fmt.Sprintf("/snippets/%d", feedback.ID)
 
@@ -162,10 +162,10 @@ func (app Application) handleSingleSnippetView(w http.ResponseWriter, r *http.Re
 	resultTpl := app.ResultRawToTpl(resultRaw)
 
 	// get the flash message (and delete it from the session), if there is one
-	flash := app.sessionManager.PopString(r.Context(), `flash`)
+	flash := app.sessionManager.PopString(r.Context(), `Flash`)
 
 	// create data object
-	data := app.buildTemplateData()
+	data := app.buildTemplateData(r)
 	data.Snippet = resultTpl
 	data.Flash = flash
 
@@ -208,14 +208,14 @@ func (app *Application) handleUrlQuery(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) handleUnderConstruction(w http.ResponseWriter, r *http.Request) {
-	data := app.buildTemplateData()
+	data := app.buildTemplateData(r)
 	data.URL = fmt.Sprintf("GET %s", r.RequestURI)
 
 	app.Render(w, http.StatusOK, `under_construction.go.html`, data)
 }
 
 func (app *Application) handleSignupForm(w http.ResponseWriter, r *http.Request) {
-	data := app.buildTemplateData()
+	data := app.buildTemplateData(r)
 	data.Form = SignupForm{}
 	app.Render(w, http.StatusOK, `signup.go.html`, data)
 }
@@ -237,7 +237,7 @@ func (app *Application) handleSignup(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(form.MinChars(form.Password, 8), `Password`, `'Password' must be at least 8 characters long!`)
 
 	if !form.Valid() {
-		data := app.buildTemplateData()
+		data := app.buildTemplateData(r)
 		data.Form = form
 		app.Render(w, http.StatusUnprocessableEntity, `signup.go.html`, data)
 		return
@@ -268,7 +268,7 @@ func (app *Application) handleSignup(w http.ResponseWriter, r *http.Request) {
 			if sqlite3Err.Code == sqlite3.ErrNo(sqlite3.ErrConstraint) {
 				// fmt.Println(`    DB Constraint Error!`)
 				form.AddFieldError(`Email`, `Sorry, this email address is already taken!`)
-				data := app.buildTemplateData()
+				data := app.buildTemplateData(r)
 				data.Form = form
 				app.Render(w, http.StatusUnprocessableEntity, `signup.go.html`, data)
 				return
@@ -284,7 +284,7 @@ func (app *Application) handleSignup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) handleLoginForm(w http.ResponseWriter, r *http.Request) {
-	data := app.buildTemplateData()
+	data := app.buildTemplateData(r)
 	data.Form = LoginForm{}
 	// data.URL = r.RequestURI
 	app.Render(w, http.StatusOK, `login.go.html`, data)
@@ -305,7 +305,7 @@ func (app *Application) handleLogin(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(form.NotBlank(form.Password), `Password`, `Password cannot be blank!`)
 
 	if !form.Valid() {
-		data := app.buildTemplateData()
+		data := app.buildTemplateData(r)
 		data.Form = form
 		app.Render(w, http.StatusUnprocessableEntity, `login.go.html`, data)
 		return
@@ -316,7 +316,7 @@ func (app *Application) handleLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, ErrInvalidCredentials) {
 			form.AddNonFieldError(`Email or Password is incorrect.`)
-			data := app.buildTemplateData()
+			data := app.buildTemplateData(r)
 			data.Form = form
 			app.Render(w, http.StatusUnprocessableEntity, `login.go.html`, data)
 		} else {
