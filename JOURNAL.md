@@ -9,6 +9,12 @@
 
 ## 2024-07-07 09:13
 
+Die Autorisierung trägt jetzt alle Früchte: Auch das Erschleichen von ‘Create
+Snippet’ ist jetzt unterbunden, dieses Mal mit einer neuen Middleware (siehe
+Commit)
+
+## 2024-07-07 09:13
+
 Die Autorisierung trägt die ersten Früchte: Die Navbar hat ihre Scenarios des
 ‘Authorization’-Features implementiert.
 
