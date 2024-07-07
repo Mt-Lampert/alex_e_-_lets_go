@@ -7,6 +7,7 @@ import (
 
 // a convenient wrapper for template data (usually from the DB)
 type templateData struct {
+	CSRFToken       string
 	CurrentYear     int
 	Flash           string
 	Form            any

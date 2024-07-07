@@ -7,6 +7,10 @@
 
 <!-- ## 2024-07-XX XX:XX -->
 
+## 2024-07-07 15:53
+
+Jetzt ist auch die Sache mit dem CSRF-Abwehr im Kasten. Läuft! Einzelheiten im Buch!
+
 ## 2024-07-07 09:13
 
 Die Autorisierung trägt jetzt alle Früchte: Auch das Erschleichen von ‘Create

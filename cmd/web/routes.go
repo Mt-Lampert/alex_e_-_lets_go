@@ -34,6 +34,7 @@ func (app *Application) Routes() *chi.Mux {
 	// and its own middleware
 	mux.Group(func(r chi.Router) {
 		r.Use(app.sessionManager.LoadAndSave)
+		r.Use(noSurf)
 
 		// Endpoints with handlers as app methods
 		r.Get(`/`, app.handleHome)
@@ -42,14 +43,15 @@ func (app *Application) Routes() *chi.Mux {
 		r.Get(`/urlquery`, app.handleUrlQuery)
 		r.Get(`/user/login_form`, app.handleLoginForm)
 		r.Post(`/user/login`, app.handleLogin)
-		r.Get(`/user/logout`, app.handleLogout)
 		r.Get(`/user/signup_form`, app.handleSignupForm)
 		r.Post(`/user/signup`, app.handleSignup)
 
-		r.Group(func(r1 chi.Router) {
-			r1.Use(app.requireAuthentication)
-			r1.Get(`/new/snippet`, app.handleNewSnippetForm)
-			r1.Post(`/create/snippet`, app.handleNewSnippet)
+		r.Group(func(rAuth chi.Router) {
+			rAuth.Use(app.requireAuthentication)
+
+			rAuth.Get(`/new/snippet`, app.handleNewSnippetForm)
+			rAuth.Post(`/create/snippet`, app.handleNewSnippet)
+			rAuth.Post(`/user/logout`, app.handleLogout)
 		})
 	})
 

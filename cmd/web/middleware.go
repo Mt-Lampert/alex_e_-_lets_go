@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/justinas/nosurf"
 )
 
 // new type representing a middleware function
@@ -73,6 +75,16 @@ func (app *Application) requireAuthentication(next http.Handler) http.Handler {
 		w.Header().Add(`Cache-Control`, `no store`)
 		next.ServeHTTP(w, r)
 	})
+}
+
+func noSurf(next http.Handler) http.Handler {
+	crsfHandler := nosurf.New(next)
+	crsfHandler.SetBaseCookie(http.Cookie{
+		HttpOnly: true,
+		Path:     `/`,
+		Secure:   true,
+	})
+	return crsfHandler
 }
 
 // vim: ts=4 sw=4 fdm=indent

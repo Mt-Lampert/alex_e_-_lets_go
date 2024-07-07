@@ -15,6 +15,7 @@ import (
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
 	"github.com/go-playground/form/v4"
+	"github.com/justinas/nosurf"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -121,6 +122,7 @@ func (app *Application) Render(
 // factory helper to build a templateData instance
 func (app *Application) buildTemplateData(r *http.Request) *templateData {
 	return &templateData{
+		CSRFToken:       nosurf.Token(r),
 		CurrentYear:     time.Now().Year(),
 		Flash:           app.sessionManager.PopString(r.Context(), `flash`),
 		IsAuthenticated: app.isAuthenticated(r),
