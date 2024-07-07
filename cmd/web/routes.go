@@ -37,8 +37,6 @@ func (app *Application) Routes() *chi.Mux {
 
 		// Endpoints with handlers as app methods
 		r.Get(`/`, app.handleHome)
-		r.Post(`/create/snippet`, app.handleNewSnippet)
-		r.Get(`/new/snippet`, app.handleNewSnippetForm)
 		r.Get(`/snippets/{id}`, app.handleSingleSnippetView)
 		r.Get(`/snippets`, app.handleSnippetList)
 		r.Get(`/urlquery`, app.handleUrlQuery)
@@ -47,6 +45,12 @@ func (app *Application) Routes() *chi.Mux {
 		r.Get(`/user/logout`, app.handleLogout)
 		r.Get(`/user/signup_form`, app.handleSignupForm)
 		r.Post(`/user/signup`, app.handleSignup)
+
+		r.Group(func(r1 chi.Router) {
+			r1.Use(app.requireAuthentication)
+			r1.Get(`/new/snippet`, app.handleNewSnippetForm)
+			r1.Post(`/create/snippet`, app.handleNewSnippet)
+		})
 	})
 
 	return mux
