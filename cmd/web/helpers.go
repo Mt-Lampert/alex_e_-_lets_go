@@ -226,7 +226,23 @@ func Authenticate(email, password string) (int64, error) {
 
 // returns true if user is authenticated, false if not
 func (app *Application) isAuthenticated(r *http.Request) bool {
-	return app.sessionManager.Exists(r.Context(), `userID`)
+	// return app.sessionManager.Exists(r.Context(), `userID`)
+	isAuthenticated, ok := r.Context().Value(isAuthenticatedContextKey).(bool)
+	if !ok {
+		return false
+	}
+
+	return isAuthenticated
+}
+
+// returns true if a user with an id exists in the database
+func (app *Application) userExists(id int64) (bool, error) {
+	dbUserCount, err := db.Qs.CheckUser(context.Background(), id)
+	if err != nil {
+		return false, err
+	}
+
+	return dbUserCount == 1, nil
 }
 
 // vim: ts=4 sw=4 fdm=indent

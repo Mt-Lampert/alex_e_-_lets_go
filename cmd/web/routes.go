@@ -35,6 +35,7 @@ func (app *Application) Routes() *chi.Mux {
 	mux.Group(func(r chi.Router) {
 		r.Use(app.sessionManager.LoadAndSave)
 		r.Use(noSurf)
+		r.Use(app.authenticate)
 
 		// Endpoints with handlers as app methods
 		r.Get(`/`, app.handleHome)

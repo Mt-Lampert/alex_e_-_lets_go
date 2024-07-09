@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -85,6 +86,40 @@ func noSurf(next http.Handler) http.Handler {
 		Secure:   true,
 	})
 	return crsfHandler
+}
+
+func (app *Application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// do we already have an authenticated userID in the session?
+		fmt.Println("  Inside app.authenticate()")
+		id := app.sessionManager.GetInt64(r.Context(), `userID`)
+		// if not found
+		if id == 0 {
+			fmt.Println("    userID not found!")
+			// we needn't check further, so ...
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// Ok, we have to check!
+		exists, err := app.userExists(id)
+		if err != nil {
+			app.ServerError(w, err)
+			return
+		}
+
+		fmt.Printf("    userID from sessionManager: %d\n", id)
+
+		// Hey! That user really exists!
+		if exists {
+			fmt.Println("    userID exists in database!")
+			// define an updated context instance
+			ctx := context.WithValue(r.Context(), isAuthenticatedContextKey, true)
+			r = r.WithContext(ctx)
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 // vim: ts=4 sw=4 fdm=indent

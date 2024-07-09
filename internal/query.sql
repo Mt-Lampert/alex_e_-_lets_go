@@ -24,4 +24,5 @@ RETURNING id, name, email, created;
 SELECT id, name, hashed_password FROM users
 WHERE email = ?;
 
-
+-- name: CheckUser :one
+SELECT COUNT(*) from users WHERE id=?;
