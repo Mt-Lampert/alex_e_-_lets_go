@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"path/filepath"
+	"time"
 )
 
 // a convenient wrapper for template data (usually from the DB)
@@ -59,6 +60,15 @@ func buildTemplateCache() (map[string]*template.Template, error) {
 	}
 
 	return cache, nil
+}
+
+func humanDate(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+
+	// convert t to UTC before formatting it
+	return t.UTC().Format(`2006-01-02 03:04`)
 }
 
 // vim: ts=4 sw=4 fdm=indent
