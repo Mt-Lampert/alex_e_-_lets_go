@@ -3,6 +3,8 @@ package main
 import (
 	"testing"
 	"time"
+
+	"github.com/MtLampert/alex_e_-_lets_go/internal/assert"
 )
 
 type humanDateTest struct {
@@ -34,11 +36,11 @@ func TestHumanDate(t *testing.T) {
 		},
 	}
 
-	for _, tt := range testCases {
-		hd := humanDate(tt.timestamp)
-		if hd != tt.expected {
-			t.Errorf(`%s: %q should be %q`, tt.name, hd, tt.expected)
-		}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			hd := humanDate(tc.timestamp)
+			assert.Equal(t, hd, tc.expected)
+		})
 	}
 }
 
