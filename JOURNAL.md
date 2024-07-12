@@ -7,6 +7,132 @@
 
 <!-- ## 2024-07-XX XX:XX -->
 
+## 2024-07-12 16:48
+
+Als nächstes haben wir uns einen eigenen Helfer geschrieben. So sieht er aus:
+
+```go
+package assert
+
+import "testing"
+
+func Equal[T comparable](t *testing.T, actual, expected T) {
+	// marks this function as Test Helper Function
+	t.Helper()
+
+	if actual != expected {
+		t.Errorf("'%v' should be '%v'", actual, expected)
+	}
+}
+```
+
+Da gibt es doch einige Sachen anzumerken:
+
+1. `[T comparable]` -- bedeutet: „... für alle Typen (`T`), die sich als Typen
+   vergleichen lassen.“ Diese Syntax ist eine sog. _Template_-Syntax. Statt `T`
+   kann jeder Datentyp verwendet werden, der sich unmittelbar mit sich selbst
+   vergleichen lässt. Einen `string` kann man mit einem `string` vergleichen, eine
+   `int` mit einer `int`, ein `bool` mit einem `bool`, und sogar eine `int` mit
+   einer `int64`.
+2. `*testing.T` bezieht sich auf den Typ `T` im `testing`-Package – __nicht__ auf
+   einen Template-Platzhalter!
+3. `expected T` bezieht sich wieder auf den Template-Platzhalter von vorhin.
+4. `t.Helper()` markiert diese Funktion als _testing helper._ Es wird gleich klar
+   werden, was das bedeutet.
+
+Und so haben wir diese Hilfsfunktion eingesetzt:
+
+```go
+type humanDateTest struct {
+	name      string
+	timestamp time.Time
+	expected  string
+}
+
+func TestHumanDate(t *testing.T) {
+	// test cases as 'table'
+	// -1-
+	testCases := []humanDateTest{
+		{
+			name:      `UTC`,
+			timestamp: time.Date(2022, 3, 17, 10, 15, 0, 0, time.UTC),
+			expected:  `2022-03-17 10:15`,
+		},
+	}
+
+	for _, tc := range testCases {
+		// -2-
+		t.Run(tc.name, func(t *testing.T) {
+			hd := humanDate(tc.timestamp)
+			// -3-
+			assert.Equal(t, hd, tc.expected)
+		})
+	}
+}
+```
+
+#### Anmerkungen
+
+1. Wie man sieht, haben wir hier mit `testCases` eine sog. _Test-Tabelle_
+   definiert: Jedes Glied in dieser Tabelle liefert die Daten für alles,
+   was später für ‚seinen‘ Test nötig ist.
+0. Die Tests werden in der `for`-Schleife durchlaufen. `t.Run()` akzeptiert
+   zwei Argumente: Den Namen, der eindeutig benennt, welcher Test z.B. einen
+   Fehler auslöste, und eine anonyme Funktion, die genau die gleiche Signatur
+   hat wie die einfache Test-Funktion von oben.
+0. `assert.Equal()` ist die Helfer-Funktion von eben. Da sie eine 
+   Helfer-Funktion ist, brauchen wir hier nicht mehr anzugeben, wie sie mit
+   dem Test und mit einem Fehlerfall umzugehen hat. Das haben wir ja
+   dort an Ort und Stelle festgelegt.
+
+
+
+## 2024-07-12 10:41
+
+### TESTING IN GO
+
+OK, wir machen jetzt Golang Testing. In seiner einfachsten Form sieht ein Test so aus:
+
+Hier erst einmal die zu testende Funktion:
+
+```go
+func humanDate(t time.Time) string {
+	// time is equal to the Epoch
+	if t.IsZero() {
+		return ""
+	}
+	// convert t to UTC before formatting it
+	return t.UTC().Format(`2006-01-02 03:04`)
+}
+```
+
+Und hier der einfachste Test:
+
+```go
+// file: helpers_test.go
+
+func TestHumanDate(t *testing.T) {
+	// test cases as 'table'
+	hd := humanDate(2022, 3, 17, 10, 15, 0, 0, time.UTC)
+	expected := `2022-03-17 10:15`
+
+	if hd != expected {
+		t.Errorf(`TestHumanDate: %q should be %q`, hd, tt.expected)
+	}
+}
+```
+
+Man sieht: Das Go-Testing-Framework hat keinerlei Helfer-Funktion wie z.B.
+[Jest](https://jestjs.io); Alles ist Handarbeit. Lediglich `t` muss man
+erklären. `t` ist die Schnittstelle zur _Testing Engine._
+
+Einige Regeln gibt es auch noch zu beachten.
+
+1. Tests werden von _Go_ nur dann erkannt, wenn sie in Dateien stehen, auf die
+   das Muster `*_test.go` passt.
+2. Jeder Test muss mit `Test*`beginnen.
+3. Jede Test-Funktion muss `*testing.T` als Argument akzeptieren.
+
 ## 2024-07-07 15:53
 
 Jetzt ist auch die Sache mit dem CSRF-Abwehr im Kasten. Läuft! Einzelheiten im Buch!
