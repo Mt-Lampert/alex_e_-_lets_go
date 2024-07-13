@@ -355,4 +355,9 @@ func (app *Application) handleLogout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, `/`, http.StatusSeeOther)
 }
 
+// ping for testing
+func ping(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, `OK.`)
+}
+
 // vim: ts=4 sw=4 fdm=indent

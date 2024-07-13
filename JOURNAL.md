@@ -1,11 +1,19 @@
 
 # TODO
 
-- [ ] (Long-term) Die selbstgebackene Validierung auf _Validator_ umstellen. Hier ein [Artikel](https://thedevelopercafe.com/articles/payload-validation-in-go-with-validator-626594a58cf6).
+- [ ] (Long-term) Die selbstgebackene Validierung auf _Validator_ umstellen.
+  Hier ein
+  [Artikel](https://thedevelopercafe.com/articles/payload-validation-in-go-with-validator-626594a58cf6).
 
 # JOURNAL
 
 <!-- ## 2024-07-XX XX:XX -->
+
+## 2024-07-13 08:38
+
+Dieses Mal geht es um das Unit Testing von Middleware und Response Handlern. Zum Glück liefert uns die _stdlib_ Werkzeuge dafür.  
+
+
 
 ## 2024-07-12 16:48
 
@@ -44,9 +52,9 @@ Und so haben wir diese Hilfsfunktion eingesetzt:
 
 ```go
 type humanDateTest struct {
-	name      string
+	name	string
 	timestamp time.Time
-	expected  string
+	expected	string
 }
 
 func TestHumanDate(t *testing.T) {
