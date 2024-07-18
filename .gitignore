@@ -1,6 +1,7 @@
 .env
 go.sum
 *.db
+node_modules/
 tmp/
 internal/db/db.go
 internal/db/models.go

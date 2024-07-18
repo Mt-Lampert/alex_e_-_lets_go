@@ -1,0 +1,14 @@
+{
+  "name": "alex_e_-_lets_go",
+  "version": "1.0.0",
+  "description": "Alex Edward's Webgo book course follow-along",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Me",
+  "license": "MIT",
+  "devDependencies": {
+    "cypress": "^13.13.1"
+  }
+}

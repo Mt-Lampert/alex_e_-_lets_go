@@ -12,3 +12,6 @@ dev: db_build
 test: db_test
 	go test -v ./cmd/web/
 
+
+
+# vim: ts=4 sw=4 fdm=indent
