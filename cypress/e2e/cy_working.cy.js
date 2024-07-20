@@ -7,6 +7,6 @@ describe('Golang Server', () => {
 
   it('answers to a ping', () => {
     cy.visit(`${DEVSERVER}/ping`)
-    cy.get('h2').contains("Ping")
+    cy.get("#ping").contains("Ping")
   })
 })

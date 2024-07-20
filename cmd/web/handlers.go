@@ -356,8 +356,9 @@ func (app *Application) handleLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 // ping for testing
-func ping(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, `OK.`)
+func (app *Application) handlePing(w http.ResponseWriter, r *http.Request) {
+	data := app.buildTemplateData(r)
+	app.Render(w, http.StatusOK, `ping.go.html`, data)
 }
 
 // vim: ts=4 sw=4 fdm=indent

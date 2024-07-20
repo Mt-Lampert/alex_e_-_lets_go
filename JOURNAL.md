@@ -9,11 +9,117 @@
 
 <!-- ## 2024-07-XX XX:XX -->
 
+## 2024-07-18 19:26
+
+Hab ein wenig mit _Cypress_ herumgespielt und das hier herausgefunden:
+
+In der Dokumentation von _Cypress_ wird empfohlen, so etwas wie hier als
+Markierung zu benutzen.
+
+```html
+<h2 data-test="ping">Ping Ping</h2>
+```
+
+Da haben sie die Rechnung ohne die _Go Template Engine_ gemacht – die löscht
+nämlich solche Kinkerlitzchen, und die Tests laufen ins Leere. Da ist es dann
+doch besser, sich auf die gute alte `#id` zu verlassen.
+
+```html
+<h2 id="ping">Ping Ping</h2>
+```
+
+## 2024-07-18 09:35
+
+Habe für das End-To-End-Testing _Cypress_ installiert und bin hellauf begeistert!
+
+## 2024-07-13 19:31
+
+Noch ein Nachtrag zum letzten Eintrag: Ich habe hier ein Muster gefunden, das man zu einem Snippet ausarbeiten könnte:
+
+```git
+func TestSecureHeaders(t *testing.T) {
+	// >>> snippet tHandlerstubs
+	// initialize a Response object and a http request stub
+	rr := httptest.NewRecorder()
+	r, err := http.NewRequest(http.MethodGet, `/`, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// <<< end snippet
+
+	// >>> snippet tMWnext
+	// Create a mock HTTP handler that we can pass to our secureHeaders()
+	// middleware which writes a 200 OK status code and an 'OK.' response body
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `OK.`)
+	})
+	secureHeaders(next).ServeHTTP(rr, r)
+	// <<< end snippet
+
+
+	// >>> snippet tResResult
+	// get the results of the 'request'
+	rs := rr.Result()
+	defer rs.Body.Close()
+	// <<< end snippet
+
+	// test #01
+	expected := `default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com`
+	assert.Equal(t, rs.Header.Get(`Content-Security-Policy`), expected)
+	// test #02
+	expected = `origin-when-cross-origin`
+	assert.Equal(t, rs.Header.Get(`Referrer-Policy`), expected)
+	// test #03
+	expected = `nosniff`
+	assert.Equal(t, rs.Header.Get(`X-content-Type-Options`), expected)
+	// test #04
+	expected = `deny`
+	assert.Equal(t, rs.Header.Get(`X-Frame-Options`), expected)
+	// test #05
+	expected = `0`
+	assert.Equal(t, rs.Header.Get(`X-XSS-Protection`), expected)
+
+	//------------------------------------------------------------
+	// test whether secureHeaders has passed the staff properly to 'next'
+	//------------------------------------------------------------
+
+	// Check the Status code
+	assert.Equal(t, rs.StatusCode, http.StatusOK)
+
+
+	// >>> snippet tResBody
+	// use IO to read the request body and save it in the 'body' variable as
+	// []bytes Slice
+	body, err := io.ReadAll(rs.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// remove all leading and trailing whitespace
+	bytes.TrimSpace(body)
+	// <<< end snippet
+
+	// test the body
+	assert.Equal(t, string(body), `OK.`)
+}
+```
+
+Das ist jetzt erst mal nur für die Schublade. Ganz im Sinne von „YAGNI until PITA“ in _Obsidian._
+
 ## 2024-07-13 08:38
 
-Dieses Mal geht es um das Unit Testing von Middleware und Response Handlern. Zum Glück liefert uns die _stdlib_ Werkzeuge dafür.  
+Die folgenden Anmerkungen beziehen sich auf die `TestPing()`-Funktion in
+`cmd/web/handlers_test.go`
 
+Dieses Mal geht es um das Unit Testing von Middleware und Response Handlern.
+Zum Glück liefert uns die _stdlib_ Werkzeuge dafür.  
 
+Das wichtigste Werkzeug ist das _Recorder_-Werkzeug aus dem
+`net/http/httptest`-Paket. Dieses Werkzeug liefert eine Menge _Props and
+Methods,_ mit denen man die _Response_ auslesen und testen kann.
+
+Neu ist hier auch die `http.NewRequest()`-Methode, mit der sich eine _Request_
+auch ohne Browser aus dem Hut zaubern lässt. Als _Mock, Stub_ oder _Fake_ –
+oder wie auch immer man das nennen will.
 
 ## 2024-07-12 16:48
 

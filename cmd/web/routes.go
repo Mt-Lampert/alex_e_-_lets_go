@@ -39,7 +39,7 @@ func (app *Application) Routes() *chi.Mux {
 
 		// Endpoints with handlers as app methods
 		r.Get(`/`, app.handleHome)
-		r.Get(`/ping`, ping)
+		r.Get(`/ping`, app.handlePing)
 		r.Get(`/snippets/{id}`, app.handleSingleSnippetView)
 		r.Get(`/snippets`, app.handleSnippetList)
 		r.Get(`/urlquery`, app.handleUrlQuery)
