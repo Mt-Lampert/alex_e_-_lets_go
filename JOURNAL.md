@@ -9,6 +9,16 @@
 
 <!-- ## 2024-07-XX XX:XX -->
 
+## 2024-07-21 21:22
+
+Ich habe jetzt auch die Navbar erfolgreich in die _Ping_-Seite integriert. Der
+Trick war, das `data`-Objekt in der `base(..., data *TemplateData)` an
+`nav(data *TemplateData)` weiter zu reichen.
+
+(Das ist hier im MarkDown nicht möglich darzustellen, weil für `templ` kein
+Formatierungs-Template vorliegt. Ich verweise deshalb auf den Code in
+`tpl.Base()`
+
 ## 2024-07-21 20:11
 
 Da ich im `tpl`-Paket auf `type templateData` us dem `main`-Package zugreifen
@@ -34,7 +44,7 @@ func (app *Application) handlePing(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-Also: Als erstes wird das (fertig gerenderte) _Ping_ Component erstellt.
+Also: Als erstes wird das (fertig bereitete) _Ping_ Component erstellt.
 Dann wird es an das Layout-Component _Base_ weitergereicht. Und zum Schluss
 wird das fertige Gesamtpaket gerendert und an den _ResponseWriter_ zum
 Verschicken weitergereicht.

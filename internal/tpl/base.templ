@@ -21,6 +21,9 @@ templ Base(title string, main templ.Component, data *TemplateData) {
 	</header>
 
 
+	@navbar(data)
+
+
 	/* <!-- embed the navigation template here --> */
 	/* {{ template "nav" . }} */
 	/* <!-- add the flash message here --> */

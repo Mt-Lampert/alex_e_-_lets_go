@@ -1,0 +1,26 @@
+package tpl
+
+templ navbar(data *TemplateData) {
+<nav>
+	<div>
+		<a href="/">Home</a>
+
+		if data.IsAuthenticated {
+		<a href="/new/snippet">Create Snippet</a>
+		}
+	</div>
+	<div>
+		if data.IsAuthenticated {
+		<form action="/user/logout" method="post">
+			<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+			<button>Logout</button>
+		</form>
+		} else {
+		<a href="/user/login_form">Login</a>
+		<a href="/user/signup_form">Sign Up</a>
+		}
+	</div>
+</nav>
+}
+
+// vim: ts=4 sw=4 fdm=indent

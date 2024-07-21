@@ -9,4 +9,9 @@ describe('Golang Server', () => {
     cy.visit(`${DEVSERVER}/ping`)
     cy.get("#ping").contains("Ping")
   })
+
+  it('has a working navbar', () => {
+    cy.visit(`${DEVSERVER}/ping`)
+    cy.get('nav').contains("Login")
+  })
 })
