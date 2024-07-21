@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
+	tpl "github.com/MtLampert/alex_e_-_lets_go/internal/tpl"
 	"github.com/MtLampert/alex_e_-_lets_go/internal/validator"
 	"github.com/go-chi/chi/v5"
 	"github.com/mattn/go-sqlite3"
@@ -357,8 +358,13 @@ func (app *Application) handleLogout(w http.ResponseWriter, r *http.Request) {
 
 // ping for testing
 func (app *Application) handlePing(w http.ResponseWriter, r *http.Request) {
-	data := app.buildTemplateData(r)
-	app.Render(w, http.StatusOK, `ping.go.html`, data)
+	// data := app.buildTemplateData(r)
+	// app.Render(w, http.StatusOK, `ping.go.html`, data)
+	main := tpl.Ping()
+	page := tpl.Base(`Ping`, main, `2024`)
+	// return templ.Handler(component)
+	page.Render(r.Context(), w)
+
 }
 
 // vim: ts=4 sw=4 fdm=indent

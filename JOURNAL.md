@@ -9,6 +9,27 @@
 
 <!-- ## 2024-07-XX XX:XX -->
 
+## 2024-07-21 13:39
+
+Hier beginnt eine neue Zeitrechnung! Ich habe begonnen, das Projekt von
+Standard-Go-Templates auf [Templ](https://templ.guide) umzustellen.
+
+Hier der entscheidende Code:
+
+```go
+func (app *Application) handlePing(w http.ResponseWriter, r *http.Request) {
+	main := tpl.Ping()
+	page := tpl.Base(`Ping`, main, `2024`)
+	// return templ.Handler(component)
+	page.Render(r.Context(), w)
+}
+```
+
+Also: Als erstes wird das (fertig gerenderte) _Ping_ Component erstellt.
+Dann wird es an das Layout-Component _Base_ weitergereicht. Und zum Schluss
+wird das fertige Gesamtpaket gerendert und an den _ResponseWriter_ zum
+Verschicken weitergereicht.
+
 ## 2024-07-18 19:26
 
 Hab ein wenig mit _Cypress_ herumgespielt und das hier herausgefunden:

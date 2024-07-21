@@ -5,8 +5,10 @@ db_test:
 db_build:
 	cp ./snippets_public.db ./snippets.db
 
+gen_templ:
+	templ generate
 
-dev: db_build
+dev: db_build gen_templ
 	go run ./cmd/web/
 
 test: db_test

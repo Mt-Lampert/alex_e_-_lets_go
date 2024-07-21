@@ -2,7 +2,7 @@
 go.sum
 *.db
 node_modules/
-tmp/
+internal/tpl/*_templ.go
 internal/db/db.go
 internal/db/models.go
 internal/db/query.sql.go
