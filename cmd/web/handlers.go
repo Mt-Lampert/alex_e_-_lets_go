@@ -358,10 +358,10 @@ func (app *Application) handleLogout(w http.ResponseWriter, r *http.Request) {
 
 // ping for testing
 func (app *Application) handlePing(w http.ResponseWriter, r *http.Request) {
-	// data := app.buildTemplateData(r)
+	data := app.buildTemplateData(r)
 	// app.Render(w, http.StatusOK, `ping.go.html`, data)
 	main := tpl.Ping()
-	page := tpl.Base(`Ping`, main, `2024`)
+	page := tpl.Base(`Ping`, main, data)
 	// return templ.Handler(component)
 	page.Render(r.Context(), w)
 

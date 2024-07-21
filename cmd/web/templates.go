@@ -7,16 +7,16 @@ import (
 )
 
 // a convenient wrapper for template data (usually from the DB)
-type templateData struct {
-	CSRFToken       string
-	CurrentYear     int
-	Flash           string
-	Form            any
-	IsAuthenticated bool
-	Snippet         TplSnippet
-	Snippets        []TplSnippet
-	URL             string
-}
+// type templateData struct {
+// 	CSRFToken       string
+// 	CurrentYear     int
+// 	Flash           string
+// 	Form            any
+// 	IsAuthenticated bool
+// 	Snippet         TplSnippet
+// 	Snippets        []TplSnippet
+// 	URL             string
+// }
 
 func buildTemplateCache() (map[string]*template.Template, error) {
 	// initialize a template cache

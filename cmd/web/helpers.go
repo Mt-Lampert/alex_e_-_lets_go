@@ -14,18 +14,19 @@ import (
 	"unicode/utf8"
 
 	"github.com/MtLampert/alex_e_-_lets_go/internal/db"
+	"github.com/MtLampert/alex_e_-_lets_go/internal/tpl"
 	"github.com/go-playground/form/v4"
 	"github.com/justinas/nosurf"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type TplSnippet struct {
-	ID      string
-	Title   string
-	Content string
-	Created string
-	Expires string
-}
+// type TplSnippet struct {
+// 	ID      string
+// 	Title   string
+// 	Content string
+// 	Created string
+// 	Expires string
+// }
 
 // writes an error message and stack trace to the error log.
 // Then it sends a generic 500 Internal Server Error message to the frontend.
@@ -52,7 +53,7 @@ func (app *Application) NotFound(w http.ResponseWriter) {
 }
 
 // converts a single DB snippet into a snippet for use in templates
-func (app *Application) ResultRawToTpl(r db.GetSnippetRow) TplSnippet {
+func (app *Application) ResultRawToTpl(r db.GetSnippetRow) tpl.DbSnippet {
 	id := strconv.Itoa(int(r.ID))
 	var createdTpl string
 
@@ -63,7 +64,7 @@ func (app *Application) ResultRawToTpl(r db.GetSnippetRow) TplSnippet {
 	myExpiresTpl := fmt.Sprintf("%v", r.Ends)
 	contentTpl := strings.ReplaceAll(r.Content, "\\n", "\n")
 
-	return TplSnippet{
+	return tpl.DbSnippet{
 		ID:      id,
 		Title:   r.Title,
 		Content: contentTpl,
@@ -73,9 +74,9 @@ func (app *Application) ResultRawToTpl(r db.GetSnippetRow) TplSnippet {
 }
 
 // converts a slice of raw DB snippets into snippets for use in templates
-func (app *Application) RawSnippetsToTpl(rs []db.Snippet) []TplSnippet {
+func (app *Application) RawSnippetsToTpl(rs []db.Snippet) []tpl.DbSnippet {
 	var createdTpl string
-	var tsp = make([]TplSnippet, 0)
+	var tsp = make([]tpl.DbSnippet, 0)
 
 	for _, r := range rs {
 		if snippetExpired(r.Created.Time, r.Expires.String) {
@@ -85,7 +86,7 @@ func (app *Application) RawSnippetsToTpl(rs []db.Snippet) []TplSnippet {
 		if r.Created.Valid {
 			createdTpl = r.Created.Time.Format("2006-01-02 03:04:05")
 			// myExpiresTpl := fmt.Sprintf("%v", r.Ends)
-			tsp = append(tsp, TplSnippet{
+			tsp = append(tsp, tpl.DbSnippet{
 				ID:      id,
 				Title:   r.Title,
 				Content: r.Content,
@@ -102,7 +103,7 @@ func (app *Application) Render(
 	w http.ResponseWriter,
 	status int,
 	page string,
-	data *templateData,
+	data *tpl.TemplateData,
 ) {
 	ts, ok := app.templateCache[page]
 	if !ok {
@@ -120,13 +121,13 @@ func (app *Application) Render(
 }
 
 // factory helper to build a templateData instance
-func (app *Application) buildTemplateData(r *http.Request) *templateData {
-	return &templateData{
+func (app *Application) buildTemplateData(r *http.Request) *tpl.TemplateData {
+	return &tpl.TemplateData{
 		CSRFToken:       nosurf.Token(r),
-		CurrentYear:     time.Now().Year(),
-		Flash:           app.sessionManager.PopString(r.Context(), `flash`),
+		CurrentYear:     strconv.FormatInt(int64(time.Now().Year()), 10),
 		IsAuthenticated: app.isAuthenticated(r),
 	}
+	// erg. Flash:           app.sessionManager.PopString(r.Context(), `flash`),
 }
 
 // checks if 'title' form value is valid

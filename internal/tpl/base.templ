@@ -1,6 +1,8 @@
 package tpl
 
-templ Base(title string, main templ.Component, currentYear string) {
+
+
+templ Base(title string, main templ.Component, data *TemplateData) {
 <!DOCTYPE html>
 <html lang="en">
 
@@ -28,7 +30,7 @@ templ Base(title string, main templ.Component, currentYear string) {
 	<main>
 		@main
 	</main>
-	<footer>Powered by <a href="https://golang.org">Go</a> ({currentYear})</footer>
+	<footer>Powered by <a href="https://golang.org">Go</a> ({data.CurrentYear})</footer>
 </body>
 
 </html>

@@ -9,6 +9,15 @@
 
 <!-- ## 2024-07-XX XX:XX -->
 
+## 2024-07-21 20:11
+
+Da ich im `tpl`-Paket auf `type templateData` us dem `main`-Package zugreifen
+musste, musste ich den Spieß umdrehen und diese Typen ins `tpl`-Paket
+verschieben und dann die Referenzen im `main`-Package anpassen. Denn von `main`
+nach `tpl` ‚runterschicken‘ funktioniert nicht. Man kann sie nur von `tpl` nach
+`main` importieren.
+
+
 ## 2024-07-21 13:39
 
 Hier beginnt eine neue Zeitrechnung! Ich habe begonnen, das Projekt von
